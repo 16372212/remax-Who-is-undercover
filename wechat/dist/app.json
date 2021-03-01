@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/new/index",
+    "pages/new_room/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "Wechat Todo App",
+    "navigationBarBackgroundColor": "#323239"
+  }
+}
