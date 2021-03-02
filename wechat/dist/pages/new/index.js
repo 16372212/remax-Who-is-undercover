@@ -32,6 +32,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var anna_remax_ui__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! anna-remax-ui */ "./node_modules/anna-remax-ui/esm/index.js");
 /* harmony import */ var _assets_logo_png__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/assets/logo.png */ "./src/assets/logo.png");
 /* harmony import */ var _assets_none_png__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/assets/none.png */ "./src/assets/none.png");
+/* harmony import */ var _hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../hooks/wxPostRequest */ "./src/hooks/wxPostRequest.js");
+
 
 
 
@@ -56,27 +58,12 @@ var userProductInfo = [{
   }
 }];
 
-var beginGame = function beginGame() {// 判断是否所有用户都在，并且准备好了
-  // 若都准备好了，则每个人获得自己的随机答案。
-};
-
 function MyCardAndPic(props) {
   var todo = react__WEBPACK_IMPORTED_MODULE_0___default.a.useContext(_app__WEBPACK_IMPORTED_MODULE_2__["TodoContext"]);
   var roomInfo = todo.roomInfo; // 用户信息需要实时更新的
 
   var flexWidthClass = roomInfo.roomSetting.total >= 4 ? "flex-width-4" : "flex-width-3";
   var tmp_images = roomInfo.playerList; // 得到用户nickName, avatar信息等
-  // 要展示的信息
-  // 这里应该是判断个数，如果是人数没有满，如果人数满了则。。。
-  // var myPicImage = tmp_images.map((date) => {
-  //   return (
-  //     <View key={date.openid} className={flexWidthClass}>
-  //       <Image className="myPic-image" src={date.avatarUrl=="null"?logo:date.avatarUrl} /> 
-  //       <View>{date.nickName}</View>  
-  //       <View>{date.state}</View>  
-  //     </View>
-  //   );
-  // });
 
   var tmp_images_not_full = tmp_images;
   var num_diff = roomInfo.roomSetting.total - roomInfo.playerList.length;
@@ -109,18 +96,7 @@ function MyCardAndPic(props) {
     className: "card myCard"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], null, props.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
     className: "myPic"
-  }, myPicImage), "  ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
-    className: "special-bottom"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Image"], {
-    src: props.specialBottom.imageSrc
-  })), " ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
-    className: "special-bottom-middle"
-  }, props.specialBottom.description), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(anna_remax_ui__WEBPACK_IMPORTED_MODULE_3__["Button"], {
-    type: "primary",
-    plain: true,
-    color: "black",
-    onTap: beginGame
-  }, "\u5F00\u59CB")));
+  }, myPicImage), "  ");
 }
 
 /* harmony default export */ __webpack_exports__["default"] = (function () {
@@ -179,11 +155,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var remax_wechat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! remax/wechat */ "./node_modules/remax/wechat.js");
 /* harmony import */ var _components_AddButton__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/components/AddButton */ "./src/components/AddButton/index.tsx");
 /* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/app */ "./src/app.js");
-/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./index.css */ "./src/pages/new/index.css");
-/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _first_card__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./first-card */ "./src/pages/new/first-card.js");
-/* harmony import */ var _second_card__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./second-card */ "./src/pages/new/second-card.js");
-/* harmony import */ var _hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../hooks/wxPostRequest */ "./src/hooks/wxPostRequest.js");
+/* harmony import */ var anna_remax_ui__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! anna-remax-ui */ "./node_modules/anna-remax-ui/esm/index.js");
+/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./index.css */ "./src/pages/new/index.css");
+/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _first_card__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./first-card */ "./src/pages/new/first-card.js");
+/* harmony import */ var _second_card__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./second-card */ "./src/pages/new/second-card.js");
+/* harmony import */ var _hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../hooks/wxPostRequest */ "./src/hooks/wxPostRequest.js");
+
 
 
 
@@ -218,6 +196,24 @@ var ReadyGameUrl = server + "/game/ready_game";
 var StartGameUrl = server + "/game/start_game";
 var EndGameUrl = server + "/game/end_game";
 var RestartGameUrl = server + "/game/restart_game";
+var normalInfo = {
+  roomID: "",
+  // 这个ID并没有返回
+  roomSetting: {
+    spys: null,
+    blank: null,
+    total: null
+  },
+  masterOpenid: "000000",
+  // string 房主的Openid
+  playerList: [],
+  // player[] : openid,nickName,avatarUrl, state, word, role, number
+  state: "Wait",
+  // enum[Open, Wait, Ready, Playing]
+  word: {},
+  wordList: null //此房间已经玩过的词汇列表
+
+};
 /* harmony default export */ __webpack_exports__["default"] = (function () {
   var todo = react__WEBPACK_IMPORTED_MODULE_0__["useContext"](_app__WEBPACK_IMPORTED_MODULE_3__["TodoContext"]); // back
 
@@ -233,10 +229,48 @@ var RestartGameUrl = server + "/game/restart_game";
     refreshGame();
   };
 
+  var beginGame = function beginGame() {
+    normalPost(StartGameUrl);
+    refreshGame();
+  };
+
+  var readyGame = function readyGame() {
+    console.log("ready game"); // todo.globalData.
+
+    normalPost(ReadyGameUrl);
+    refreshGame();
+  }; // 在房主结束游戏后，如何处理房间不存在
+
+
+  var endGame = function endGame() {
+    normalPost(EndGameUrl); // todo.setRoomInfo(normalPost);
+
+    refreshGame();
+    Object(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["navigateBack"])();
+  };
+
+  var changeWord = function changeWord() {
+    normalPost(RestartGameUrl);
+  };
+
+  var changeState = function changeState() {
+    var tmp_info = roomInfomation;
+    tmp_info.state = "Ready";
+    todo.setRoomInfo(tmp_info);
+    console.log(todo.roomInfo.state);
+  };
+
+  var changeRoot = function changeRoot() {
+    var tmp_info = roomInfomation;
+    tmp_info.masterOpenid = todo.globalData.id;
+    todo.setRoomInfo(tmp_info);
+    console.log(todo.roomInfo.masterOpenid);
+  };
+
   function normalPost(url) {
     var data = {};
     data.tempId = todo.globalData.id;
-    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_7__["default"])(url, DefaultPostHeader, data);
+    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_8__["default"])(url, DefaultPostHeader, data);
   } // 更新信息，应该是有任何一个页面的行为都应该调用这个链接
 
 
@@ -272,7 +306,7 @@ var RestartGameUrl = server + "/game/restart_game";
     };
 
     console.log("run onLoad CallBack");
-    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_7__["default"])(RefreshRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_8__["default"])(RefreshRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
   }
 
   console.log("in new,username: ", todo.items.userName);
@@ -280,14 +314,42 @@ var RestartGameUrl = server + "/game/restart_game";
     className: "top-yellow-background"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
     className: "content"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_first_card__WEBPACK_IMPORTED_MODULE_5__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_first_card__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
+    className: "special-bottom"
+  }, console.log("compare id: ", roomInfomation.masterOpenid, " ", todo.globalData.id), roomInfomation.masterOpenid == todo.globalData.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
+    className: "special-bottom-middle"
+  }, "请玩家准备好了在开始"), roomInfomation.masterOpenid != todo.globalData.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
+    className: "special-bottom-middle"
+  }, "请玩家准备=>"), roomInfomation.masterOpenid == todo.globalData.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_4__["Button"], {
+    type: "primary",
+    plain: true,
+    color: "black",
+    onTap: beginGame
+  }, "\u5F00\u59CB"), roomInfomation.masterOpenid != todo.globalData.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_4__["Button"], {
+    type: "primary",
+    plain: true,
+    color: "black",
+    onTap: readyGame
+  }, "\u51C6\u5907"))), roomInfomation.state == "Playing" && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
     className: "content"
-  }, roomInfomation.state == "Playing" && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_second_card__WEBPACK_IMPORTED_MODULE_6__["default"], null), console.log("room state: ", roomInfomation.state)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_second_card__WEBPACK_IMPORTED_MODULE_7__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_2__["default"], {
     text: "\u9000\u51FA\u623F\u95F4",
     onClick: leaveHome
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_2__["default"], {
     text: "\u66F4\u65B0\u4FE1\u606F",
     onClick: handleRefresh
+  }), roomInfomation.state == "Playing" && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    text: "\u6362\u8BCD",
+    onClick: changeWord
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    text: "\u7ED3\u675F\u6E38\u620F",
+    onClick: endGame
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    text: "\u6D4B\u8BD5\u6309\u94AE\uFF1A\u6539\u72B6\u6001",
+    onClick: changeState
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    text: "\u6D4B\u8BD5\u6309\u94AE\uFF1A\u6539\u623F\u4E3B",
+    onClick: changeRoot
   })));
 });
 
@@ -323,30 +385,14 @@ __webpack_require__.r(__webpack_exports__);
     // 循环找到该用户对应的word信息
     // if (date.openid == todo.globalData.id){
     if (date.openid == "000003") {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
-        key: date.openid,
-        __key: date.openid
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], null, date.word));
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], null, date.word);
     }
   });
-
-  var changeWord = function changeWord() {
-    // change word
-    console.log("change word");
-  };
-
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
     className: "card myCard"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
-    className: "myPic"
-  }, myPicImage), "  ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(remax_wechat__WEBPACK_IMPORTED_MODULE_1__["View"], {
     className: "special-bottom"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(anna_remax_ui__WEBPACK_IMPORTED_MODULE_3__["Button"], {
-    type: "primary",
-    plain: true,
-    color: "black",
-    onTap: changeWord
-  }, "\u6362\u8BCD")));
+  }, myPicImage));
 });
 
 /***/ }),

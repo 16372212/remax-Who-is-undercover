@@ -5,10 +5,11 @@ import {
   navigateBack, 
   Label,
   Text, 
-  Button,
+  
 } from 'remax/wechat';
 import AddButton from '@/components/AddButton';
 import { TodoContext } from '@/app';
+import {Button, Popup,Tag} from 'anna-remax-ui';
 import './index.css';
 
 import {useState} from "react";
@@ -40,6 +41,16 @@ const StartGameUrl = server + "/game/start_game";
 const EndGameUrl = server + "/game/end_game";
 const RestartGameUrl = server + "/game/restart_game";
 
+const normalInfo = 
+{ roomID:"", // 这个ID并没有返回
+    roomSetting: {spys:null,blank:null,total:null},
+    masterOpenid:"000000", // string 房主的Openid
+    playerList:[], // player[] : openid,nickName,avatarUrl, state, word, role, number
+    state:"Wait", // enum[Open, Wait, Ready, Playing]
+    word:{},
+    wordList:null,//此房间已经玩过的词汇列表
+  }
+
 export default () => {
   const todo = React.useContext(TodoContext); // back
   var roomInfomation = todo.roomInfo;
@@ -53,6 +64,43 @@ export default () => {
     refreshGame();
   };
 
+  const beginGame = () => {
+    normalPost(StartGameUrl);
+    refreshGame();
+  };
+
+  const readyGame = () => {
+    console.log("ready game")
+    // todo.globalData.
+    normalPost(ReadyGameUrl);
+    refreshGame();
+  };
+
+  // 在房主结束游戏后，如何处理房间不存在
+  const endGame = () => {
+    normalPost(EndGameUrl);
+    // todo.setRoomInfo(normalPost);
+    refreshGame();
+    navigateBack(); 
+  }
+  
+  const changeWord = () => {
+    normalPost(RestartGameUrl);
+  }
+
+  const changeState = () =>{
+    var tmp_info = roomInfomation;
+    tmp_info.state = "Ready";
+    todo.setRoomInfo(tmp_info);
+    console.log(todo.roomInfo.state);
+  }
+  
+  const changeRoot = () => {
+    var tmp_info = roomInfomation;
+    tmp_info.masterOpenid = todo.globalData.id;
+    todo.setRoomInfo(tmp_info);
+    console.log(todo.roomInfo.masterOpenid);
+  }
 
   function normalPost(url){
     let data = {};
@@ -97,14 +145,28 @@ export default () => {
       <View className="content">
         {/* 判断，如果房间状态属于Wait人已满，Open人未满, Ready*/}
         <MyCard/>
+        <View className="special-bottom">
+          {console.log(
+            "compare id: ",roomInfomation.masterOpenid," ",todo.globalData.id
+          )}
+          {roomInfomation.masterOpenid == todo.globalData.id && <View className="special-bottom-middle">{"请玩家准备好了在开始"}</View>}
+          {roomInfomation.masterOpenid != todo.globalData.id && <View className="special-bottom-middle">{"请玩家准备=>"}</View>}
+          {roomInfomation.masterOpenid == todo.globalData.id &&<Button type="primary" plain color="black" onTap={beginGame}>开始</Button>}
+          {roomInfomation.masterOpenid != todo.globalData.id && <Button type="primary" plain color="black" onTap={readyGame}>准备</Button> }
+        </View>
       </View>
-      <View className = "content">
-        {roomInfomation.state == "Playing" && <MyCard2/>}
-        {console.log("room state: ",roomInfomation.state)}
-      </View>
+      
+      {roomInfomation.state == "Playing" && <View className = "content">
+        <MyCard2/>
+        
+      </View>}
       <View>
         <AddButton text="退出房间" onClick={leaveHome} />
         <AddButton text="更新信息" onClick={handleRefresh} />
+        {roomInfomation.state == "Playing" && <AddButton text="换词" onClick={changeWord}/>}
+        <AddButton text="结束游戏" onClick={endGame}/> 
+        <AddButton text="测试按钮：改状态" onClick={changeState}/>
+        <AddButton text="测试按钮：改房主" onClick={changeRoot }/>  
       </View>
     </View>
   );

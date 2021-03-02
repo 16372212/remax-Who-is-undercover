@@ -1,5 +1,5 @@
 const backgroundColor = '#323239';
-const pages = ['pages/index/index', 'pages/new/index','pages/new_room/index'];
+const pages = ['pages/index/index', 'pages/new/index'];
 
 module.exports = {
   pages,

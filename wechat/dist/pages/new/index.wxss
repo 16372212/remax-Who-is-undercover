@@ -69,7 +69,7 @@
   border-radius: 19rpx;
   height: 70rpx;
   background-color: rgba(122, 197, 205, 0.1);
-  color: #3681d6;
+  color: #746f6d;
   font-size: .75rem;
   padding: 6rpx 12rpx;
   margin-bottom: 12rpx;
@@ -84,7 +84,7 @@
 }
 .special-bottom > view:last-child {
   flex: 0 0 100rpx;
-  border: 1rpx solid #3681d6;
+  border: 1rpx solid #767677;
   border-radius: 25rpx;
   text-align: center;
   padding: 4rpx;

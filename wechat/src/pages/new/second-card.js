@@ -12,23 +12,17 @@ export default () => {
         // if (date.openid == todo.globalData.id){
         if (date.openid == "000003"){
           return (
-          <View key={date.openid}>
-            <View>{date.word}</View>
-          </View>
+        <View>{date.word}</View>
           );
       }
     }); 
 
-    const changeWord = ()=>{
-        // change word
-        console.log("change word");
-    }
+    
 
     return(
         <View className="card myCard">
-            <View className="myPic">{myPicImage}</View>  {/*图像加名称(username + user url) */}
             <View className="special-bottom">
-              <Button type="primary" plain color="black" onTap={changeWord}>换词</Button>
+              {myPicImage }
             </View>
         </View>
     ); 

@@ -831,8 +831,7 @@ module.exports = {
   "pages/index/index": [
     "onLoad"
   ],
-  "pages/new/index": [],
-  "pages/new_room/index": []
+  "pages/new/index": []
 },
       appEvents: []
     }

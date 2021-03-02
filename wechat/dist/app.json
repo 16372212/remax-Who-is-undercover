@@ -1,8 +1,7 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/new/index",
-    "pages/new_room/index"
+    "pages/new/index"
   ],
   "window": {
     "navigationBarTitleText": "Wechat Todo App",

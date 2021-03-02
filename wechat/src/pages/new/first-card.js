@@ -4,6 +4,8 @@ import { TodoContext } from '@/app'
 import {Button, Popup,Tag} from 'anna-remax-ui';
 import logo from '@/assets/logo.png';
 import none from '@/assets/none.png';
+import WxPostRequest from '../../hooks/wxPostRequest'
+
 
 const default_user_Info = {openid:"######",nickName:"",avatarUrl:none,state:"",word:"",role:"",number:null};
 const userProductInfo = [
@@ -16,10 +18,6 @@ const userProductInfo = [
   },
 ];
 
-const beginGame = () =>{
-  // 判断是否所有用户都在，并且准备好了
-  // 若都准备好了，则每个人获得自己的随机答案。
-}
 
 function MyCardAndPic(props) {
   const todo = React.useContext(TodoContext);
@@ -28,17 +26,7 @@ function MyCardAndPic(props) {
   const flexWidthClass =
     roomInfo.roomSetting.total >= 4 ? "flex-width-4" : "flex-width-3";
   var tmp_images = roomInfo.playerList; // 得到用户nickName, avatar信息等
-  // 要展示的信息
-  // 这里应该是判断个数，如果是人数没有满，如果人数满了则。。。
-  // var myPicImage = tmp_images.map((date) => {
-  //   return (
-  //     <View key={date.openid} className={flexWidthClass}>
-  //       <Image className="myPic-image" src={date.avatarUrl=="null"?logo:date.avatarUrl} /> 
-  //       <View>{date.nickName}</View>  
-  //       <View>{date.state}</View>  
-  //     </View>
-  //   );
-  // });
+
   
   var tmp_images_not_full = tmp_images;
   var num_diff = roomInfo.roomSetting.total - roomInfo.playerList.length; 
@@ -69,11 +57,6 @@ function MyCardAndPic(props) {
     <View className="card myCard">
       <View>{props.title}</View>  
       <View className="myPic">{myPicImage}</View>  {/*图像加名称(username + user url) */}
-      <View className="special-bottom">
-        <View><Image src={props.specialBottom.imageSrc} /></View> {/* "等玩家准备好..." 这段前面的图像 */}
-        <View className="special-bottom-middle">{props.specialBottom.description}</View>
-        <Button type="primary" plain color="black" onTap={beginGame}>开始</Button>
-      </View>
     </View>
   );
 }

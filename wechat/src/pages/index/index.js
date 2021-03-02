@@ -194,7 +194,7 @@ export default () => {
       })
     };
     console.log("run onLoad CallBack");
-    WxPostRequest(CreateNewRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+    WxPostRequest(EnterRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
   }
 
   const handleCreate = () => {
@@ -219,7 +219,7 @@ export default () => {
   // 进入房间
   const handleIn = () =>{
     enterRoom(); // 利用ID从后端接口得到房间信息
-    navigateTo({ url: '../new_room/index'});
+    navigateTo({ url: '../new/index'});
   }
 
   const ajaxTry = () =>{

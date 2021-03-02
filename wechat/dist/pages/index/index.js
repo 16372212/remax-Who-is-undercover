@@ -496,7 +496,7 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     };
 
     console.log("run onLoad CallBack");
-    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__["default"])(CreateNewRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__["default"])(EnterRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
   }
 
   var handleCreate = function handleCreate() {
@@ -526,7 +526,7 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     enterRoom(); // 利用ID从后端接口得到房间信息
 
     Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
-      url: '../new_room/index'
+      url: '../new/index'
     });
   };
 
