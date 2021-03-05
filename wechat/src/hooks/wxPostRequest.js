@@ -5,7 +5,7 @@ const WxLoginUrl = server + "/user/wx_login";
 const UpdateUserInfoUrl = server + "/user/update_userInfo";
 export default function WxPostRequest(url, header, data ,successFunc, requestFailFunc, responseFailFunc) {
 
-    console.log("*********run wxPostRequest in hook/wxPostRequest*********");   
+    console.log("*********",url,": *********");   
     let reqDataJsonString = JSON.stringify(data);
     let temp_data = {
         "data": reqDataJsonString,
@@ -19,7 +19,7 @@ export default function WxPostRequest(url, header, data ,successFunc, requestFai
         method: 'POST',
         success: function (res) {
             console.log("##",temp_data," is request data in hook/wxPostRequest");
-            console.log("res in hook/wxPostRequest: ",res);
+            console.log(header,"请求返回的值: ",res);
             if (res.data.Success) {
                 console.log(url + ": success");
                 if (successFunc) {

@@ -34890,9 +34890,9 @@ var App = function App(_ref) {
       setGlobalData = _React$useState2[1];
 
   var _React$useState3 = react__WEBPACK_IMPORTED_MODULE_0__["useState"]({
-    spys: 0,
-    blank: 0,
-    total: 0 // nums of rooms
+    spy_num: 0,
+    blank_num: 0,
+    total_num: 0 // nums of rooms
 
   }),
       _React$useState4 = _slicedToArray(_React$useState3, 2),
@@ -34900,86 +34900,89 @@ var App = function App(_ref) {
       setRoomSetting = _React$useState4[1];
 
   var _React$useState5 = react__WEBPACK_IMPORTED_MODULE_0__["useState"]({
-    roomID: "000000",
+    roomId: "000000",
     // 这个ID并没有返回
-    roomSetting: {
-      spys: 1,
-      blank: 1,
-      total: 7
-    },
-    masterOpenid: "000000",
-    // string 房主的Openid
-    playerList: [{
-      openid: "000000",
-      nickName: "user0",
-      avatarUrl: "null",
+    roomInfo: {
+      begin_player: "",
+      room_setting: {
+        spy_num: 1,
+        blank_num: 1,
+        total_num: 7
+      },
+      master_open_id: "000000",
+      // string 房主的open_id
+      player_list: [{
+        open_id: "000000",
+        nick_name: "user0",
+        avatar_url: "null",
+        state: "Ready",
+        word: "word1",
+        role: "Normal",
+        number: 0
+      }, {
+        open_id: "000001",
+        nick_name: "user1",
+        avatar_url: "null",
+        state: "Ready",
+        word: "word2",
+        role: "Spy",
+        number: 1
+      }, {
+        open_id: "000002",
+        nick_name: "user2",
+        avatar_url: "null",
+        state: "Ready",
+        word: "",
+        role: "Blank",
+        number: 2
+      }, {
+        open_id: "000003",
+        nick_name: "user3",
+        avatar_url: "null",
+        state: "Wait",
+        word: "word1",
+        role: "Normal",
+        number: 3
+      }, {
+        open_id: "000004",
+        nick_name: "user4",
+        avatar_url: "null",
+        state: "Ready",
+        word: "word1",
+        role: "Normal",
+        number: 4
+      }, {
+        open_id: "000005",
+        nick_name: "user5",
+        avatar_url: "null",
+        state: "Ready",
+        word: "word1",
+        role: "Normal",
+        number: 5
+      }],
+      // player[] : open_id,nick_name,avatar_url, state, word, role, number
       state: "Ready",
-      word: "word1",
-      role: "Normal",
-      number: 0
-    }, {
-      openid: "000001",
-      nickName: "user1",
-      avatarUrl: "null",
-      state: "Ready",
-      word: "word2",
-      role: "Spy",
-      number: 1
-    }, {
-      openid: "000002",
-      nickName: "user2",
-      avatarUrl: "null",
-      state: "Ready",
-      word: "",
-      role: "Blank",
-      number: 2
-    }, {
-      openid: "000003",
-      nickName: "user3",
-      avatarUrl: "null",
-      state: "Wait",
-      word: "word1",
-      role: "Normal",
-      number: 3
-    }, {
-      openid: "000004",
-      nickName: "user4",
-      avatarUrl: "null",
-      state: "Ready",
-      word: "word1",
-      role: "Normal",
-      number: 4
-    }, {
-      openid: "000005",
-      nickName: "user5",
-      avatarUrl: "null",
-      state: "Ready",
-      word: "word1",
-      role: "Normal",
-      number: 5
-    }],
-    // player[] : openid,nickName,avatarUrl, state, word, role, number
-    state: "Playing",
-    // enum[Open, Wait, Ready, Playing]
-    word: {
-      id: "01",
-      // string
-      normal: "word1",
-      // string
-      spy: "word2",
-      // string
-      blank: "" // string
+      // enum[Open, Wait, Ready, Playing]
+      word: {
+        id: "01",
+        // string
+        normal: "word1",
+        // string
+        spy: "word2",
+        // string
+        blank: "" // string
 
-    },
-    wordList: null //此房间已经玩过的词汇列表
+      },
+      word_cache: [] //此房间已经玩过的词汇列表
 
+    }
   }),
       _React$useState6 = _slicedToArray(_React$useState5, 2),
-      roomInfo = _React$useState6[0],
+      roomInformation = _React$useState6[0],
       setRoomInfo = _React$useState6[1];
 
   var _React$useState7 = react__WEBPACK_IMPORTED_MODULE_0__["useState"]({
-    masterOpenid: "default userName",
+    masteropen_id: "default userName",
     // the number of Room
     password: "default password",
     // password
@@ -35000,7 +35003,7 @@ var App = function App(_ref) {
       setGlobalData: setGlobalData,
       roomSetting: roomSetting,
       setRoomSetting: setRoomSetting,
-      roomInfo: roomInfo,
+      roomInformation: roomInformation,
       setRoomInfo: setRoomInfo
     }
   }, children);
@@ -35061,7 +35064,7 @@ var server = "http://81.70.201.7:9205";
 var WxLoginUrl = server + "/user/wx_login";
 var UpdateUserInfoUrl = server + "/user/update_userInfo";
 function WxPostRequest(url, header, data, successFunc, requestFailFunc, responseFailFunc) {
-  console.log("*********run wxPostRequest in hook/wxPostRequest*********");
+  console.log("*********", url, ": *********");
   var reqDataJsonString = JSON.stringify(data);
   var temp_data = {
     "data": reqDataJsonString,
@@ -35075,7 +35078,7 @@ function WxPostRequest(url, header, data, successFunc, requestFailFunc, response
     method: 'POST',
     success: function success(res) {
       console.log("##", temp_data, " is request data in hook/wxPostRequest");
-      console.log("res in hook/wxPostRequest: ", res);
+      console.log(header, "请求返回的值: ", res);
 
       if (res.data.Success) {
         console.log(url + ": success");

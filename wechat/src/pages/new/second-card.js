@@ -6,13 +6,15 @@ import logo from '@/assets/logo.png';
 
 export default () => {
     const todo = React.useContext(TodoContext);
-    var roomInfo = todo.roomInfo; // 用户信息需要实时更新的
-    var tmp_images = roomInfo.playerList; // 得到用户nickName, avatar信息等
+    var roomInfo = todo.roomInformation.roomInfo; // 用户信息需要实时更新的
+    var tmp_images = roomInfo.player_list; // 得到用户nickName, avatar信息等
     const myPicImage = tmp_images.map((date) => { // 循环找到该用户对应的word信息
-        // if (date.openid == todo.globalData.id){
-        if (date.openid == "000003"){
+        // if (date.open_id == todo.globalData.id){
+        if (date.open_id == "000003"){
           return (
-        <View>{date.word}</View>
+          <View key={date.open_id}>
+            <View>{date.word}</View>
+          </View>    
           );
       }
     }); 

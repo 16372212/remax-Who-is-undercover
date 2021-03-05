@@ -250,6 +250,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_9__);
 /* harmony import */ var anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! anna-remax-ui */ "./node_modules/anna-remax-ui/esm/index.js");
 /* harmony import */ var _hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../hooks/wxPostRequest */ "./src/hooks/wxPostRequest.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -331,14 +339,14 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
 
   var _React$useState7 = react__WEBPACK_IMPORTED_MODULE_1__["useState"](),
       _React$useState8 = _slicedToArray(_React$useState7, 2),
-      spys = _React$useState8[0],
-      setSpys = _React$useState8[1]; // roomSetting
+      spy_num = _React$useState8[0],
+      setspy_num = _React$useState8[1]; // roomSetting
 
 
   var _React$useState9 = react__WEBPACK_IMPORTED_MODULE_1__["useState"](),
       _React$useState10 = _slicedToArray(_React$useState9, 2),
-      blank = _React$useState10[0],
-      setBlank = _React$useState10[1]; // roomSetting
+      blank_num = _React$useState10[0],
+      setblank_num = _React$useState10[1]; // roomSetting
 
 
   var _React$useState11 = react__WEBPACK_IMPORTED_MODULE_1__["useState"](),
@@ -434,12 +442,18 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     console.log("create new room: ", data); // 构建请求，得到roomID, 用roomID进入新房间
 
     var successFunc = function successFunc(resp) {
-      console.log("create new room: ", resp); // 构建房间返回的数据，更新todo.roomInfo
+      console.log("返回的房间数据: ", resp); // 构建房间返回的数据，更新todo.roomInfo
 
-      if (resp.Data != null) {
-        inputRoomID(resp.Data);
-        console.log("new room ID: ", room_ID);
-        enterRoom();
+      if (resp.Data != null && resp.Data.roomId != null) {
+        console.log(resp.Data.roomId); // inputRoomID(resp.Data.roomId);
+        // console.log("创建了新的房间的ID，这个ID是: ",room_ID);   // 这里应该搞一个回调，room_ID也是没用的数据
+        // resp.Data.roomInfo就是返回的数据
+        // enterRoom(resp.Data.roomId); 
+
+        todo.setRoomInfo(resp.Data);
+        Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
+          url: '../new/index'
+        }); // 跳f转链接应该使用promise？ 可以后来再实现promise,运行好createNewRoom之后才跳转
       }
     };
 
@@ -462,22 +476,22 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
   } // 向API输入要加入房间的ID，得到房间roomInfo
 
 
-  function enterRoom() {
+  function enterRoom(tmp_roomID) {
     var data = {};
     data.tempId = globalDatas.id; // 用户ID
 
-    data.roomID = room_ID; // 房间ID
+    data.roomId = tmp_roomID; // 房间ID
 
     console.log("in a room: ", data);
 
     var successFunc = function successFunc(resp) {
-      console.log("create new room: ", resp); // 构建房间返回的数据，更新todo.roomInfo
+      console.log("新房间的信息: ", resp); // 构建房间返回的数据，更新todo.roomInfo
 
       if (resp.Data != null) {
-        todo.setRoomInfo(resp.Data); // resp.Data信息需要轮询访问，每过一段时间访问一次
+        todo.setRoomInfo.apply(todo, _toConsumableArray(resp.Data)); // resp.Data信息需要轮询访问，每过一段时间访问一次
+        // inputRoomID(resp.Data.roomId);
 
-        inputRoomID(resp.Data);
-        console.log("new room information: ", resp.Data);
+        console.log(111, " before enter room, info is ", resp.Data);
       }
     };
 
@@ -500,25 +514,20 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
   }
 
   var handleCreate = function handleCreate() {
-    var temp_items = todo.items; // items都可以删掉
-
-    temp_items.userName = user ? user.nickName : "none";
-    temp_items.playerNums = player_nums;
-    temp_items.password = room_password_create;
-    temp_items.loginSuccess = user ? true : false;
-    todo.setItems(temp_items);
+    // var temp_items = todo.items; // items都可以删掉
+    // temp_items.userName = user? user.nickName:"none";
+    // temp_items.playerNums = player_nums;
+    // temp_items.password = room_password_create;
+    // temp_items.loginSuccess = user? true:false;
+    // todo.setItems(temp_items);
     var temp_roomSetting = todo.roomSetting;
-    temp_roomSetting.total = player_nums;
-    temp_roomSetting.spys = spys;
-    temp_roomSetting.blank = blank;
+    temp_roomSetting.total_num = player_nums;
+    temp_roomSetting.spy_num = spy_num;
+    temp_roomSetting.blank_num = blank_num;
     todo.setRoomSetting(temp_roomSetting);
     console.log("index| globaldata： ", todo.globalData);
     console.log("index| after setting, todo.roomSetting: ", todo.roomSetting);
     createNewRoom(temp_roomSetting); // 后端接口: 创建房间，返回房间ID，再利用ID从后端接口得到房间信息
-
-    Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
-      url: '../new/index'
-    }); // 跳转链接应该使用promise？ 可以后来再实现promise,运行好createNewRoom之后才跳转
   }; // 进入房间
 
 
@@ -527,7 +536,7 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
 
     Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
       url: '../new/index'
-    });
+    }); // promise 这里也应该是先赋值后再navigate
   };
 
   var ajaxTry = function ajaxTry() {
@@ -546,7 +555,7 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     src: user != null ? user.avatar : _assets_logo_png__WEBPACK_IMPORTED_MODULE_8__["default"]
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
     className: "nickname"
-  }, user ? user.nickName + " here" : "Please login!", user && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
+  }, user ? user.nickName + " here" : "Please login!", !user && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "login-tip"
   }, "(Tap to login \u2191)"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__["Button"], {
     Plain: "primary",
@@ -596,20 +605,20 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     className: "InGame-small-text"
   }, "\u767D\u677F\u4E2A\u6570"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
     className: "add-todo-input",
-    placeholder: "please set blank nums",
+    placeholder: "please set blank_num nums",
     onInput: function onInput(e) {
-      return setBlank(parseInt(e.detail.value));
+      return setblank_num(parseInt(e.detail.value));
     },
-    value: parseInt(blank)
+    value: parseInt(blank_num)
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-small-text"
   }, "\u5367\u5E95\u4E2A\u6570"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
     className: "add-todo-input",
     placeholder: "please set password of your room",
     onInput: function onInput(e) {
-      return setSpys(parseInt(e.detail.value));
+      return setspy_num(parseInt(e.detail.value));
     },
-    value: parseInt(spys)
+    value: parseInt(spy_num)
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__["Button"], {
     Plain: "primary",
     plain: "true",

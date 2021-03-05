@@ -56,8 +56,8 @@ export default () => {
   const [count, setCount] = React.useState(0); // 用来控制Popup的出现和消失
   const [room_password_create, setRoomPassword] = React.useState(''); // 玩家设置的密码，用来创建某房间
   const [player_nums, setPlayerNums] = React.useState(); // roomSetting
-  const [spys, setSpys] = React.useState();             // roomSetting
-  const [blank, setBlank] = React.useState();           // roomSetting
+  const [spy_num, setspy_num] = React.useState();             // roomSetting
+  const [blank_num, setblank_num] = React.useState();           // roomSetting
   const [room_ID, inputRoomID] = React.useState();     // roomInfo
   const [room_password_user, inputRoomPassword] = React.useState(); // 玩家输入的密码，用来进入某房间
   const globalDatas = todo.globalData;
@@ -141,12 +141,16 @@ export default () => {
     console.log("create new room: ",data);
     // 构建请求，得到roomID, 用roomID进入新房间
     let successFunc = function (resp) {
-      console.log("create new room: ",resp);
+      console.log("返回的房间数据: ",resp);
       // 构建房间返回的数据，更新todo.roomInfo
-      if(resp.Data!= null){
-        inputRoomID(resp.Data);
-        console.log("new room ID: ",room_ID);
-        enterRoom();  
+      if(resp.Data!= null && resp.Data.roomId!=null){
+        console.log(resp.Data.roomId);
+        // inputRoomID(resp.Data.roomId);
+        // console.log("创建了新的房间的ID，这个ID是: ",room_ID);   // 这里应该搞一个回调，room_ID也是没用的数据
+        // resp.Data.roomInfo就是返回的数据
+        // enterRoom(resp.Data.roomId); 
+        todo.setRoomInfo(resp.Data); 
+        navigateTo({ url: '../new/index' }); // 跳f转链接应该使用promise？ 可以后来再实现promise,运行好createNewRoom之后才跳转
       }
     };
     let requestFailFunc = function () {
@@ -166,19 +170,19 @@ export default () => {
   }
 
   // 向API输入要加入房间的ID，得到房间roomInfo
-  function enterRoom(){
+  function enterRoom(tmp_roomID){
     let data = {};
     data.tempId = globalDatas.id; // 用户ID
-    data.roomID = room_ID;        // 房间ID
+    data.roomId = tmp_roomID;        // 房间ID
     console.log("in a room: ",data);
 
     let successFunc = function (resp) {
-      console.log("create new room: ",resp);
+      console.log("新房间的信息: ",resp);
       // 构建房间返回的数据，更新todo.roomInfo
       if(resp.Data!= null){ 
-        todo.setRoomInfo(resp.Data); // resp.Data信息需要轮询访问，每过一段时间访问一次
-        inputRoomID(resp.Data);
-        console.log("new room information: ",resp.Data);
+        todo.setRoomInfo(...resp.Data); // resp.Data信息需要轮询访问，每过一段时间访问一次
+        // inputRoomID(resp.Data.roomId);
+        console.log(111," before enter room, info is ",resp.Data);
       }
     };
     let requestFailFunc = function () {
@@ -198,28 +202,28 @@ export default () => {
   }
 
   const handleCreate = () => {
-    var temp_items = todo.items; // items都可以删掉
-    temp_items.userName = user? user.nickName:"none";
-    temp_items.playerNums = player_nums;
-    temp_items.password = room_password_create;
-    temp_items.loginSuccess = user? true:false;
-    todo.setItems(temp_items);
+    // var temp_items = todo.items; // items都可以删掉
+    // temp_items.userName = user? user.nickName:"none";
+    // temp_items.playerNums = player_nums;
+    // temp_items.password = room_password_create;
+    // temp_items.loginSuccess = user? true:false;
+    // todo.setItems(temp_items);
 
     var temp_roomSetting = todo.roomSetting;
-    temp_roomSetting.total = player_nums;
-    temp_roomSetting.spys = spys;
-    temp_roomSetting.blank = blank;
+    temp_roomSetting.total_num = player_nums;
+    temp_roomSetting.spy_num = spy_num;
+    temp_roomSetting.blank_num = blank_num;
     todo.setRoomSetting(temp_roomSetting);
     console.log("index| globaldata： ",todo.globalData);
     console.log("index| after setting, todo.roomSetting: ",todo.roomSetting);
     createNewRoom(temp_roomSetting); // 后端接口: 创建房间，返回房间ID，再利用ID从后端接口得到房间信息
-    navigateTo({ url: '../new/index' }); // 跳转链接应该使用promise？ 可以后来再实现promise,运行好createNewRoom之后才跳转
+    
   }
 
   // 进入房间
   const handleIn = () =>{
     enterRoom(); // 利用ID从后端接口得到房间信息
-    navigateTo({ url: '../new/index'});
+    navigateTo({ url: '../new/index'}); // promise 这里也应该是先赋值后再navigate
   }
 
   const ajaxTry = () =>{
@@ -237,7 +241,7 @@ export default () => {
 
         <View className="nickname">
           {user? user.nickName + " here" : "Please login!"} 
-          {user && <Text className="login-tip">(Tap to login ↑)</Text>}
+          {!user && <Text className="login-tip">(Tap to login ↑)</Text>}
         </View>
       </View>
       <Button Plain="primary" plain="true" color="black"  onTap={ajaxTry}>ajax</Button> 
@@ -283,9 +287,9 @@ export default () => {
               <Text className="InGame-small-text">白板个数</Text>
               <Input
                 className="add-todo-input"
-                placeholder="please set blank nums"
-                onInput={e => setBlank(parseInt(e.detail.value))}
-                value={parseInt(blank)}
+                placeholder="please set blank_num nums"
+                onInput={e => setblank_num(parseInt(e.detail.value))}
+                value={parseInt(blank_num)}
               />
             </View>
             <View>
@@ -293,8 +297,8 @@ export default () => {
               <Input
                 className="add-todo-input"
                 placeholder="please set password of your room"
-                onInput={e => setSpys(parseInt(e.detail.value))}
-                value={parseInt(spys)}
+                onInput={e => setspy_num(parseInt(e.detail.value))}
+                value={parseInt(spy_num)}
               />
             </View>
 

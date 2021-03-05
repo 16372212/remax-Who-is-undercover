@@ -6,5 +6,6 @@
   "window": {
     "navigationBarTitleText": "Wechat Todo App",
     "navigationBarBackgroundColor": "#323239"
-  }
+  },
+  "sitemapLocation": "sitemap0.json"
 }
