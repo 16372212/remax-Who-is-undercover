@@ -5,18 +5,19 @@ import {
   navigateBack, 
   Label,
   Text, 
-  
+  Image
 } from 'remax/wechat';
-import AddButton from '@/components/AddButton';
+import AddButton from '@/components/ShineButton';
 import { TodoContext } from '@/app';
 import {Button, Popup,Tag} from 'anna-remax-ui';
 import './index.css';
-
+import { usePageEvent } from 'remax/macro';
 import {useState} from "react";
 import MyCard from "./first-card";
 import MyCard2 from "./second-card";
 import WxPostRequest from '../../hooks/wxPostRequest'
-
+import logo from '@/assets/logo.png';
+import none from '@/assets/none.png';
 const DefaultPostHeader = {
   "Content-Type": "application/x-www-form-urlencoded"
 };
@@ -68,19 +69,53 @@ const normalInfo =
 
 export default () => {
   const todo = React.useContext(TodoContext); // back
-  const [test,setTest] = React.useState(0);
+  const [test,setTest] = React.useState(100);
+  const [seeAnswer,setSeeAnswer] = React.useState(false);
+  // const [leavePage,setLeavePage] = React.useState(100);
   const [indexRoomInfo, setIndexRoomInfo] = React.useState(todo.roomInformation);
   var roomInformation = todo.roomInformation;
   const userId = todo.globalData.id;
-  console.log("in index/new: info:",roomInformation);
-  
+  var interval = null;
+  usePageEvent('onShareAppMessage',(res)=>{
+    console.log("转发！");
+    if (res.from === 'button') { // 说明是通过邀请得到的
+      return {
+        title: '朋友邀请您玩谁是卧底！',
+        path: 'pages/index/index?room_ID='+todo.roomInformation.roomId,
+        success: function(res) {
+        // 转发成功
+        },
+        fail: function(res) {
+          // 转发失败
+        }
+      }
+      console.log(res.target)
+    }else{ // 正常转发
+      return {
+        title: '朋友邀请您玩谁是卧底！',
+        path: 'pages/index/index'
+      }
+    } 
+  });
 
-  const leaveHome = () => {
+  usePageEvent('onLoad', (option) => {
+    console.log(" on game!~~~");
+    if(!todo.onGame){ // 没有游戏中的话
+      todo.setOnGame(true);
+      // startInter();
+    }
+  });
+
+  const leaveHome = () => { // 离开房间后再进入，todo可能对它就是null了，因此最好refresh一下
+    console.log("结束计时");
     normalPost(ExitRoomUrl);
+    todo.setOnGame(false);
+    console.log("on game:", todo.onGame);
     refreshGame(); 
-    navigateBack();
+    // navigateBack();
   };
 
+  
   const handleRefresh = () => {
     refreshGame();
   };
@@ -96,15 +131,18 @@ export default () => {
     refreshGame();
   };
 
-  // 在房主结束游戏后，如何处理房间不存在
+  // 在房主结束游戏, 显示房间的卧底牌
   const endGame = () => {
     normalPost(EndGameUrl);
-    refreshGame();
-    navigateBack(); 
+    setSeeAnswer(true);
+    console.log("see answer");
+    // todo.setOnGame(false);
+  
   }
   
   const changeWord = () => {
     normalPost(RestartGameUrl);
+    refreshGame();
   }
 
   const changeState = () =>{
@@ -118,10 +156,36 @@ export default () => {
       tmp_info.roomInfo.state = "Ready";
     }
     todo.setRoomInfo(tmp_info);
-    // console.log("indexRoomInfo's state changes to ",indexRoomInfo.roomInfo.state);
+    console.log("indexRoomInfo's state changes to ",indexRoomInfo.roomInfo.state);
 
   }
   
+  const isNotBegin = () =>{
+    // 如果房间的状态等于playing
+    if(roomInformation.roomInfo.state == "Playing"){     
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+  const isNotReady = ()=>{
+    // 找到用户，并且判断状态
+    for(var i = 0;i<roomInformation.roomInfo.player_list.length;i++){  //循环LIST，实现浅拷贝
+      var veh = roomInfo.player_list[i];
+      if(veh.open_id == userId || veh.nick_name == todo.globalData.userInfo.nickName){ // 其实不应该判断用户的nick_name
+        return veh.open_id == "Ready";
+      }
+    }
+    // 没有从玩家列表中找到用户这个人
+    wx.showLoading({
+      title: '抱歉您暂时不属于这个房间',
+      mask: true
+    });
+    return true;
+  }
+
   const changeRoot = () => {  // react只要props改变，就会重新渲染
     var tmp_info = {};  // 只要setTest里面赋的值拥有的是新的地址，就可以即使渲染。但如果直接等于indexRoomInfo，则不会导致渲染
     tmp_info.roomId = roomInformation.roomId;
@@ -139,6 +203,16 @@ export default () => {
     console.log(roomInformation);
   }
   
+  const addPeople = () =>{
+    var tmp_info = {};  // 只要setTest里面赋的值拥有的是新的地址，就可以即使渲染。但如果直接等于indexRoomInfo，则不会导致渲染
+    tmp_info.roomId = roomInformation.roomId;
+    tmp_info.roomInfo = roomInformation.roomInfo;
+    var userLists = tmp_info.roomInfo.player_list;
+    userLists.push({open_id:test,nick_name:"beauty",avatar_url:logo, state:"Ready",word:"",role:"",number:null});
+    setTest(test+1); // 加上这个就会多刷新一次, 但是临时增加的人的id不会重复
+    tmp_info.roomInfo.player_list = userLists;
+    todo.setRoomInfo(tmp_info);
+  };
 
   function normalPost(url){
     let data = {};
@@ -150,18 +224,15 @@ export default () => {
   function refreshGame(){  // 更新信息，应该是有任何一个页面的行为都应该调用这个链接
     let data = {};
     data.tempId = userId; // 用户ID
-    // data.roomID = room_ID;        // 房间ID
-    console.log("refresh a room: ",data);
     let successFunc = function (resp) { 
-      console.log("create new room: ",resp);
+      console.log("refresh请求数据：",data);
+      console.log("refresh返回数据: ",resp);
       if(resp.Data!= null){ 
-        // resp.Data.roomId = roomInformation.roomId;
         var new_data = {
           "roomId":roomInformation.roomId,
           "roomInfo":resp.Data.roomInfo
         };
         todo.setRoomInfo(new_data); // resp.Data信息需要轮询访问，每过一段时间访问一次
-        console.log("new room information: ",new_data);
       }
     };
     let requestFailFunc = function () {
@@ -170,43 +241,90 @@ export default () => {
         icon: 'none'
       })
     };
-    let responseFailFunc = function () {
+    let responseFailFunc = function (message) {
       wx.showToast({
-        title: '登录失败',
+        title: message,
         icon: 'none'
       })
     };
-    console.log("run onLoad CallBack");
-    WxPostRequest(RefreshRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+    WxPostRequest(RefreshRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc,true);
   }
  
+  function startInter(){
+    clearInterval(interval);
+    interval = setInterval(function(){
+      refreshGame();  
+    }, 2000); 
+  }
+
   return (
     <View className="top-yellow-background">
       <View className="content">
         <MyCard/>
         <View className="special-bottom">
-          {roomInformation.roomInfo.master_open_id == userId ? <View className="special-bottom-middle">{"请玩家准备好了在开始"}</View>
+          {roomInformation.roomInfo.is_master? <View className="special-bottom-middle">{"请玩家准备好了在开始"}</View>
             :<View className="special-bottom-middle">{"请玩家准备=>"}</View>
           }
-          {roomInformation.roomInfo.master_open_id == userId ?<Button type="primary" plain color="black" onTap={beginGame}>开始</Button>:
-            <Button type="primary" plain color="black" onTap={readyGame}>准备</Button>
+          {roomInformation.roomInfo.is_master?<Button type="primary" plain color="black" disabled={isNotBegin} onTap={beginGame}>开始</Button>:
+            <Button type="primary" plain color="black" disabled={isNotReady} onTap={readyGame}>准备</Button>
           }
+       
+          <Button Plain="primary" open-type="share" plain="true" color="black">邀请好友</Button> 
         </View>
       </View>
-      
+      <Popup
+            open={seeAnswer}
+            curve = "ease"
+            onClose={() => {setSeeAnswer(false)}}> 
+          <View 
+            style={{
+              height: "200rpx",
+              width:"500rpx",
+              padding: "10rpx 25rpx",
+            }}>
+            <Text className="InGame-text">卧底词：{roomInformation.roomInfo.word["SpyWord"]}</Text>
+            {/* 卧底牌，卧底头像，卧底名称，其他人的牌*/}
+          </View>
+        </Popup>
+
       {roomInformation.roomInfo.state=="Playing" && <View className = "content">
         <MyCard2/>
       </View>}
 
+      {/* {roomInformation.roomInfo.state=="Playing" && endgame的操作 } */}
       <View>
-        <AddButton text="退出房间" onClick={leaveHome} />
-        <AddButton text="更新信息" onClick={handleRefresh} />
-        {roomInformation.roomInfo.state == "Playing" && roomInformation.roomInfo.master_open_id == userId 
-        &&<AddButton text="换词" onClick={changeWord}/>}
-        <AddButton text="结束游戏" onClick={endGame}/> 
+        {roomInformation.roomInfo.state == "Playing" && roomInformation.roomInfo.is_master 
+        &&<AddButton text="换卧底词" onClick={changeWord}/> 
+        }
+        
+        {roomInformation.roomInfo.state == "Playing" && roomInformation.roomInfo.is_master 
+        &&<AddButton text="查看卧底词" onClick={endGame}/> 
+        }
+
+        {roomInformation.roomInfo.is_master ?<AddButton text="结束游戏" onClick={leaveHome}/> :
+          <AddButton text="退出房间" onClick={leaveHome} />
+        }
+       
+
+        <AddButton text="~更新" onClick={handleRefresh}/> 
         <AddButton text="~改状态" onClick={changeState}/>
-        <AddButton text="~改房主" onClick={changeRoot}/> 
-        <Button type="primary" plain color="black" onTap={getRoonInfo}>roomInfo:</Button> 
+        {/* <AddButton text="~改房主" onClick={changeRoot}/>  */}
+        {/* <AddButton text="~加用户" onClick={addPeople}/>  */}
+        {/* <Button type="primary" plain color="black" onTap={getRoonInfo}>roomInfo:</Button> */}
+      </View>
+        
+      <View className="bottom">
+        <swiper indicator-dots="true" circular="true" autoplay="true" interval="2000" duration="500" current="0">
+          <swiper-item>
+              <Image src="http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg" width="100%"></Image>
+          </swiper-item>
+          <swiper-item>
+              <Image src="http://bing.getlove.cn/bingImage" width="100%"></Image>
+          </swiper-item>
+          <swiper-item>
+              <Image src={none} width="100%"></Image>
+          </swiper-item>
+        </swiper> 
       </View>
     </View>
   );

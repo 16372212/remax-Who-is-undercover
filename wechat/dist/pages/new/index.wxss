@@ -39,10 +39,11 @@
 .myPic {
   display: flex;
   flex-wrap: wrap;
-  color: #999999;
+  color: #130d166b;
   font-size: .75rem;
   text-align: center;
   margin: 24rpx 0px;
+  background: none;
 }
 .myPic .flex-width-3 {
   flex: 0 0 33.3%;
@@ -53,6 +54,8 @@
 .myPic-image {
   width: 88rpx;
   height: 88rpx;
+  border-radius: 50%;
+  align-self: center;
 }
 .myCard {
   font-size: 0.875rem;
@@ -93,8 +96,26 @@
   width: 100%;
   height: 300rpx;
   position: absolute;
-  background-color: #ffe60f;
+  background-color: #ffe70f00;
   border-bottom-left-radius: 20%;
   border-bottom-right-radius: 20%;
   z-index: -1;
+}
+.bottom {
+  width: 100%;
+  height: 250rpx;
+  bottom: 0;
+  position: fixed;
+  background-color: rgba(255, 253, 255, 0.452); 
+}
+
+.InGame-text {
+  font-size: 43rpx;
+  color: #f7dfc7;
+  font-weight: 80;
+}
+
+.InGame-small-text {
+  font-size: 33rpx;
+  color: #f3daa7;
 }

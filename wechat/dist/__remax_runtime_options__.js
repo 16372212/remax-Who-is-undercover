@@ -829,9 +829,13 @@ module.exports = {
 },
       pageEvents: {
   "pages/index/index": [
-    "onLoad"
+    "onLoad",
+    "onShareAppMessage"
   ],
-  "pages/new/index": []
+  "pages/new/index": [
+    "onLoad",
+    "onShareAppMessage"
+  ]
 },
       appEvents: []
     }

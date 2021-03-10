@@ -3,9 +3,9 @@ var salt = "123456";
 const server = "http://81.70.201.7:9205";                
 const WxLoginUrl = server + "/user/wx_login";
 const UpdateUserInfoUrl = server + "/user/update_userInfo";
-export default function WxPostRequest(url, header, data ,successFunc, requestFailFunc, responseFailFunc) {
+export default function WxPostRequest(url, header, data ,successFunc, requestFailFunc, responseFailFunc,refresh) {
 
-    console.log("*********",url,": *********");   
+    if(!refresh){console.log("***",url,":***");}
     let reqDataJsonString = JSON.stringify(data);
     let temp_data = {
         "data": reqDataJsonString,
@@ -18,8 +18,10 @@ export default function WxPostRequest(url, header, data ,successFunc, requestFai
         data: temp_data,
         method: 'POST',
         success: function (res) {
-            console.log("##",temp_data," is request data in hook/wxPostRequest");
-            console.log(header,"请求返回的值: ",res);
+            if(!refresh){
+                console.log("请求的数据：",temp_data," is request data in hook/wxPostRequest");
+                console.log("请求返回的值: ",res);
+            }
             if (res.data.Success) {
                 console.log(url + ": success");
                 if (successFunc) {
@@ -28,7 +30,7 @@ export default function WxPostRequest(url, header, data ,successFunc, requestFai
             } else {
                 console.log(url + ": response fail, msg: " + res.data.Message);
                 if (responseFailFunc) {
-                    responseFailFunc()
+                    responseFailFunc(res.data.Message)
                 }
             }
         },

@@ -39,15 +39,17 @@
     "packNpmRelationList": [],
     "minifyWXSS": true
   },
-  "compileType": "miniprogram",
+  "compileType": "game",
   "libVersion": "2.15.0",
-  "appid": "wx8838e46475bdc77d",
+  "appid": "wx0cb61fd8f48b9f6b",
   "projectname": "Wechat_only",
   "debugOptions": {
     "hidedInDevtools": []
   },
   "scripts": {},
   "isGameTourist": false,
+  "simulatorType": "wechat",
+  "simulatorPluginLibVersion": {},
   "condition": {
     "search": {
       "list": []

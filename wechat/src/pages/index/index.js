@@ -9,18 +9,22 @@ import {
   Text,
   navigateTo,
   onLocalServiceResolveFail,
+
 } from 'remax/wechat';
 import clsx from 'clsx';
 import useUserInfo from '../../hooks/useUserInfo';
-import AddButton from '@/components/AddButton';
+import AddButton from '@/components/ShineButton';
 import LoginButton from '@/components/LoginButton';
 import { TodoContext } from '@/app';
 import logo from '@/assets/logo.png';
+import none from '@/assets/none.png';
+
 import './index.css';
-import {Button, Popup,Tag} from 'anna-remax-ui';
+import {Button, Popup,Tag,Stepper} from 'anna-remax-ui';
+// import { Swiper, SwiperSlide } from 'swiper/react';
+
 import { usePageEvent } from 'remax/macro';
 import WxPostRequest from '../../hooks/wxPostRequest';
-
 
 const DefaultPostHeader = {
   "Content-Type": "application/x-www-form-urlencoded"
@@ -50,32 +54,55 @@ const wxGetUserInfo = require('../../hooks/wxGetUserInfo');
 
 
 
+
+
+
 export default () => {
-  const [user, login] = useUserInfo(); // 登录按钮
   const todo = React.useContext(TodoContext);
   const [count, setCount] = React.useState(0); // 用来控制Popup的出现和消失
   const [room_password_create, setRoomPassword] = React.useState(''); // 玩家设置的密码，用来创建某房间
   const [player_nums, setPlayerNums] = React.useState(); // roomSetting
-  const [spy_num, setspy_num] = React.useState();             // roomSetting
-  const [blank_num, setblank_num] = React.useState();           // roomSetting
+  const [spy_num, setspy_num] = React.useState(1);             // roomSetting
+  const [blank_num, setblank_num] = React.useState(0);           // roomSetting
   const [room_ID, inputRoomID] = React.useState();     // roomInfo
   const [room_password_user, inputRoomPassword] = React.useState(); // 玩家输入的密码，用来进入某房间
   const globalDatas = todo.globalData;
 
-
-  usePageEvent('onLoad', () => {
+  usePageEvent('onShareAppMessage',(res)=>{
+    console.log("转发！");
+    if (res.from === 'button') { // 说明是通过邀请得到的
+      return {
+        title: '朋友邀请您玩谁是卧底！',
+        path: 'pages/index/index?room_ID='+todo.roomInformation.roomId,
+        success: function(res) {
+        // 转发成功
+        },
+        fail: function(res) {
+          // 转发失败
+        }
+      }
+      console.log(res.target)
+    }else{ // 正常转发
+      return {
+        title: '朋友邀请您玩谁是卧底！',
+        path: 'pages/index/index'
+      }
+    } 
+  });
+  
+  usePageEvent('onLoad', (option) => {
+    console.log("============",option);
     wx.showLoading({
       title: '登录中',
       mask: true
     });
-    console.log("---onLoad---");
-
+    // 1 首先获取用户UserInfo
     wxGetUserInfo.api.requestApi(1)
       .then(res_userInfo => {
-        //成功回调函数，已获取UserInfo信息
+        // 成功回调函数，已获取UserInfo信息(无后端交流)
         var temp_data = {};
         temp_data.userInfo = res_userInfo.userInfo;
-        // 获取用户ID
+        // 2 获取用户ID
         return new Promise((resolve, reject) => {
           wx.login({
             success (res) {
@@ -96,14 +123,14 @@ export default () => {
                       icon: 'none'
                   })
                 };
-                let responseFailFunc = function () {
+                let responseFailFunc = function (message) {
                     wx.showToast({
-                        title: '登录失败',
+                        title: message,
                         icon: 'none'
                     })
                 };
-                // console.log("run onLoad CallBack");
-                WxPostRequest(WxLoginUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+                console.log("run onLoad CallBack");
+                WxPostRequest(WxLoginUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc,false);
               }
             },
             fail: res=>{
@@ -119,8 +146,37 @@ export default () => {
           tempId: res.id,
           userInfo: JSON.stringify(res.userInfo)
         };
-        console.log("updateUserInfo: ",data);
-        WxPostRequest(UpdateUserInfoUrl, DefaultPostHeader, data);
+        console.log("用户信息: ",data);
+        let successFunc = function (resp) {
+          // 新加入的这个已经成功传入了
+          if(option && option.room_ID){ // 判断用户是不是被邀请来的，如果是，就直接进入房间
+            wx.showToast({
+              title: '正在进入房间'+option.room_ID,
+              icon: 'none'
+            });
+            console.log(res.id," 正在进入的房间 ",option.room_ID);
+            inputRoomID(option.room_ID);
+            let data = {
+              id: res.id,
+              userInfo: res.userInfo
+            }; 
+            todo.setGlobalData(data);
+            enterRoom(option.room_ID,res.id);
+          }
+        };
+        let requestFailFunc = function () {
+          wx.showToast({
+              title: '服务器维护中',
+              icon: 'none'
+          })
+        };
+        let responseFailFunc = function (message) {
+            wx.showToast({
+                title: message,
+                icon: 'none'
+            })
+        };
+        WxPostRequest(UpdateUserInfoUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc,false);
       })
       .catch(res => {
       //失败回调函数
@@ -131,26 +187,22 @@ export default () => {
           duration: 2000
         })
       })
-  })
+  });
 
   // 输入房间设置信息，得到创建的房间ID, 然后再enterRoom进入该房间
   function createNewRoom(roomSetting){
     let data = {};
     data.tempId = globalDatas.id;
     data.roomSetting = JSON.stringify(roomSetting);
-    console.log("create new room: ",data);
+    console.log("create room申请数据： ",data);
     // 构建请求，得到roomID, 用roomID进入新房间
     let successFunc = function (resp) {
-      console.log("返回的房间数据: ",resp);
+      // todo.setOnGame(true); // 进入房间
+      console.log("create room返回数据: ",resp);
       // 构建房间返回的数据，更新todo.roomInfo
       if(resp.Data!= null && resp.Data.roomId!=null){
-        console.log(resp.Data.roomId);
-        // inputRoomID(resp.Data.roomId);
-        // console.log("创建了新的房间的ID，这个ID是: ",room_ID);   // 这里应该搞一个回调，room_ID也是没用的数据
-        // resp.Data.roomInfo就是返回的数据
-        // enterRoom(resp.Data.roomId); 
         todo.setRoomInfo(resp.Data); 
-        navigateTo({ url: '../new/index' }); // 跳f转链接应该使用promise？ 可以后来再实现promise,运行好createNewRoom之后才跳转
+        navigateTo({ url: '../new/index' }); 
       }
     };
     let requestFailFunc = function () {
@@ -159,30 +211,40 @@ export default () => {
         icon: 'none'
       })
     };
-    let responseFailFunc = function () {
+    let responseFailFunc = function (message) {
       wx.showToast({
-        title: '登录失败',
+        title: message,
         icon: 'none'
       })
     };
     console.log("run onLoad CallBack");
-    WxPostRequest(CreateNewRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+    WxPostRequest(CreateNewRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc,false);
   }
 
   // 向API输入要加入房间的ID，得到房间roomInfo
-  function enterRoom(tmp_roomID){
+  function enterRoom(id_of_room,userid){
     let data = {};
     data.tempId = globalDatas.id; // 用户ID
-    data.roomId = tmp_roomID;        // 房间ID
-    console.log("in a room: ",data);
-
+    if(userid){
+      data.tempId = userid;
+    }
+    if(id_of_room){
+      data.roomId = id_of_room;        // 输入的房间的ID
+    }else{
+      data.roomId = room_ID;    
+    }
+    console.log("enter room 申请数据: ",data);
     let successFunc = function (resp) {
-      console.log("新房间的信息: ",resp);
+      console.log("enter room返回数据: ",resp);
+      // todo.setOnGame(true);
       // 构建房间返回的数据，更新todo.roomInfo
       if(resp.Data!= null){ 
-        todo.setRoomInfo(...resp.Data); // resp.Data信息需要轮询访问，每过一段时间访问一次
-        // inputRoomID(resp.Data.roomId);
-        console.log(111," before enter room, info is ",resp.Data);
+        resp.Data.roomId = room_ID;
+        todo.setRoomInfo(resp.Data); // resp.Data信息需要轮询访问，每过一段时间访问一次
+        console.log("这时候跳转界面",resp.Data);
+        navigateTo({ url: '../new/index'});
+      }else{
+        navigateTo({ url: '../new/index'}); 
       }
     };
     let requestFailFunc = function () {
@@ -191,39 +253,47 @@ export default () => {
         icon: 'none'
       })
     };
-    let responseFailFunc = function () {
+    let responseFailFunc = function (message) {
       wx.showToast({
-        title: '登录失败',
+        title: message,
         icon: 'none'
       })
     };
-    console.log("run onLoad CallBack");
     WxPostRequest(EnterRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
   }
 
-  const handleCreate = () => {
-    // var temp_items = todo.items; // items都可以删掉
-    // temp_items.userName = user? user.nickName:"none";
-    // temp_items.playerNums = player_nums;
-    // temp_items.password = room_password_create;
-    // temp_items.loginSuccess = user? true:false;
-    // todo.setItems(temp_items);
 
-    var temp_roomSetting = todo.roomSetting;
-    temp_roomSetting.total_num = player_nums;
-    temp_roomSetting.spy_num = spy_num;
-    temp_roomSetting.blank_num = blank_num;
-    todo.setRoomSetting(temp_roomSetting);
-    console.log("index| globaldata： ",todo.globalData);
-    console.log("index| after setting, todo.roomSetting: ",todo.roomSetting);
-    createNewRoom(temp_roomSetting); // 后端接口: 创建房间，返回房间ID，再利用ID从后端接口得到房间信息
-    
+  const handleCreate = () => {
+    // 判断用户是否在游戏中，在就直接进入房间，不在则调用后端接口创建房间
+    if(todo.onGame){ // 用户不在房间中
+      wx.showToast({
+        title: '您正在游戏中,正在为您返回该房间',
+        icon: 'none'
+      })
+      navigateTo({ url: '../new/index' });
+    }else{
+      var temp_roomSetting = todo.roomSetting;
+      temp_roomSetting.total_num = player_nums;
+      temp_roomSetting.spy_num = spy_num;
+      temp_roomSetting.blank_num = blank_num;
+      todo.setRoomSetting(temp_roomSetting);
+      console.log("index| globaldata： ",todo.globalData);
+      console.log("index| after setting, todo.roomSetting: ",todo.roomSetting);
+      createNewRoom(temp_roomSetting); // 后端接口: 创建房间，返回房间ID，再利用ID从后端接口得到房间信息
+    }  
   }
 
   // 进入房间
   const handleIn = () =>{
-    enterRoom(); // 利用ID从后端接口得到房间信息
-    navigateTo({ url: '../new/index'}); // promise 这里也应该是先赋值后再navigate
+    if(todo.onGame){ // 用户在游戏中
+      wx.showToast({
+        title: '您正在游戏中,正在为您返回该房间',
+        icon: 'none'
+      })
+      navigateTo({ url: '../new/index'}); // promise 这里也应该是先赋值后再navigate
+    }else{
+      enterRoom(); // 利用ID从后端接口得到房间信息
+    } 
   }
 
   const ajaxTry = () =>{
@@ -235,19 +305,16 @@ export default () => {
   return (
     <View className="top-yellow-background">
       <View className="user">
-        <LoginButton login = {login}>
-          <Image className="avatar" src={user != null? user.avatar : logo} />
+        <LoginButton>
+          <Image className="avatar" src={globalDatas.userInfo != null? globalDatas.userInfo.avatarUrl : logo} />
         </LoginButton>
-
         <View className="nickname">
-          {user? user.nickName + " here" : "Please login!"} 
-          {!user && <Text className="login-tip">(Tap to login ↑)</Text>}
+          {globalDatas.userInfo? globalDatas.userInfo.nickName + " here" : "稍等正在登录~"} 
         </View>
       </View>
-      <Button Plain="primary" plain="true" color="black"  onTap={ajaxTry}>ajax</Button> 
-
+      
       <View className="todo-footer">
-        {user && <AddButton text="创建房间" onClick={() => 
+        {globalDatas.userInfo && <AddButton text="创建房间" onClick={() => 
           setCount(2)
         } />}
       
@@ -257,58 +324,33 @@ export default () => {
             onClose={() => {setCount(1)}}> 
           <View 
             style={{
-              height: "700rpx",
+              height: "600rpx",
+              width:"400rpx",
               padding: "10rpx 25rpx",
               backgroundColor: "#323239",
             }}>
-            <Text className="InGame-text">开始创建房间:</Text>
-            <View>
-              <Text className="InGame-small-text">房间人数:</Text>
-              <Input
-                className="add-todo-input"
-                placeholder="number of players?"
-                onInput={e => setPlayerNums(parseInt(e.detail.value))
-                }
-                value={parseInt(player_nums)}
-              />
+            <Text className="InGame-text">开始创建房间: </Text>
+            <View className="normal_stepper">
+              <Text className="InGame-small-text">房间人数: </Text>
+              <Stepper plain value={player_nums} onChange={val => setPlayerNums(parseInt(val))}/> 
             </View>
-
-            <View>
-              <Text className="InGame-small-text">设置密码</Text>
-              <Input
-                className="add-todo-input"
-                placeholder="please set password of your room"
-                onInput={e => setRoomPassword(e.detail.value)}
-                value={room_password_create}
-              />
+            <View className="normal_stepper">
+              <Text className="InGame-small-text">白板个数: </Text>
+              <Stepper plain value={blank_num} min={0} max={player_nums-1} onChange={val => setblank_num(parseInt(val))}/>
             </View>
-
-            <View>
-              <Text className="InGame-small-text">白板个数</Text>
-              <Input
-                className="add-todo-input"
-                placeholder="please set blank_num nums"
-                onInput={e => setblank_num(parseInt(e.detail.value))}
-                value={parseInt(blank_num)}
-              />
+            <View className="normal_stepper">
+              <Text className="InGame-small-text">卧底个数: </Text>
+              <Stepper plain value={spy_num} min={1} max={player_nums-1-blank_num} onChange={val =>setspy_num(parseInt(val))}/>
             </View>
-            <View>
-              <Text className="InGame-small-text">卧底个数</Text>
-              <Input
-                className="add-todo-input"
-                placeholder="please set password of your room"
-                onInput={e => setspy_num(parseInt(e.detail.value))}
-                value={parseInt(spy_num)}
-              />
+            <View className="normal_stepper">
+              <Button Plain="primary" plain="true" color="black"  onTap={handleCreate}>创建房间！</Button> 
             </View>
-
-            <Button Plain="primary" plain="true" color="black"  onTap={handleCreate}>创建房间！</Button> 
           </View>
         </Popup>
       </View>
 
       <View className="todo-footer">  
-        {user && <AddButton text="加入房间" onClick={() => 
+        {globalDatas.userInfo && <AddButton text="加入房间" onClick={() => 
           setCount(3)}/>}
           <Popup
             open={count==3}
@@ -320,9 +362,9 @@ export default () => {
               padding: "10rpx 25rpx",
               backgroundColor: "#323239",
             }}>
-            <Text className="InGame-text">房间ID和密码:</Text>
+            <Text className="InGame-text">房间ID和密码: </Text>
             <View>
-              <Text className="InGame-small-text">房间ID</Text>
+              <Text className="InGame-small-text">房间ID </Text>
               <Input
                 className="add-todo-input"
                 placeholder="number of players?"
@@ -330,7 +372,7 @@ export default () => {
                 value={room_ID}/>
             </View>
             <View>
-              <Text className="InGame-small-text">密码</Text>
+              <Text className="InGame-small-text">密码 </Text>
               <Input
                 className="add-todo-input"
                 placeholder="password of your room?"
@@ -342,7 +384,23 @@ export default () => {
         </Popup>
 
       </View>
+      {/* <View>
+        <Button onTap={()=>{navigateTo({ url: '../new/index'})}}>跳转</Button>   
+      </View> */}
+      <View className="bottom">
+        <swiper indicator-dots="true" circular="true" autoplay="true" width="100%" interval="2000" duration="500" current="0">
+          <swiper-item>
+              <Image src="http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg" mode="widthFix"></Image>
+          </swiper-item>
+          <swiper-item>
+              <Image src="http://bing.getlove.cn/bingImage" width="100%"></Image>
+          </swiper-item>
+          <swiper-item>
+              <Image src={none} width="100%"></Image>
+          </swiper-item>
+        </swiper>      
+      </View>
     </View>
-  
+    
   );
 };

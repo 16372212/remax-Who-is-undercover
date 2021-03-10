@@ -9,7 +9,7 @@
   display: flex;
   flex-shrink: 0;
   padding: 30px;
-  color: rgb(17, 4, 4);
+  color: rgb(245, 236, 236);
   flex-direction: column;
   align-items: center;
 }
@@ -17,7 +17,7 @@
 .login-tip {
   display: inline-block;
   font-size: 20rpx;
-  color: rgb(61, 11, 11);
+  color: rgb(245, 241, 241);
 }
 
 .avatar {
@@ -32,7 +32,12 @@
   padding-top: 40rpx;
   text-align: center;
   font-size: 40rpx;
-  font-weight: 100;
+  font-weight: 200;
+  color: rgb(245, 236, 236);
+}
+
+.normal_stepper{
+  padding-top: 30rpx;
 }
 
 .todo-items {
@@ -107,13 +112,13 @@
 
 .InGame-text {
   font-size: 43rpx;
-  color: #e2cda1;
+  color: #f7dfc7;
   font-weight: 80;
 }
 
 .InGame-small-text {
   font-size: 33rpx;
-  color: #c5953c8c;
+  color: #f3daa7;
 }
 
 .checked .todo-item-text {
@@ -137,11 +142,12 @@
 
 .todo-footer {
   flex-shrink: 0;
-  padding: 20rpx 0 100rpx;
+  padding: 75rpx 0 120rpx;
   font-size: 48rpx;
   font-weight: 200;
   text-align: center;
 }
+
 
 .add-todo-input {
   display: block;
@@ -151,20 +157,44 @@
   background: none;
   border:none;
   border-bottom: 1px solid #b4842a;
-  color: #f5f4f4;
+  color: #c4abcf;
   /* width: 60%; */
+}
+
+.button {
+  width:80px;
+  height:20px;
+  display: block; 
+  padding: 1em 3.2em; 
+  border-radius: 1.6em; 
+  color: rgb(226, 156, 156); 
+  font-size: 18px; 
+  font-family: 'Lato', sans-serif; 
+  font-weight: 700; 
+  text-align: center; 
+  text-decoration: none;
+  background-color: rgba(252, 28, 143, 1); 
+  box-shadow: 0 5px 20px rgba(252, 28, 143, .5);
 }
 
 .top-yellow-background {
   width: 100%;
   height: 300px;
   position: absolute;
-  background-color: #ffe60f;
+  background-color: #ffe70f0a;
   border-bottom-left-radius: 20%;
   border-bottom-right-radius: 20%;
   z-index: -1;
+  box-shadow: 8px 8px 8px #0a0a0a;
 }
 
+.bottom {
+  width: 100%;
+  height: 280px;
+  bottom: 0;
+  position: fixed;
+  background-color: rgba(255, 253, 255, 0.452); 
+}
 .popup-view{
   background-color: #f7981c;
   width: 100%;

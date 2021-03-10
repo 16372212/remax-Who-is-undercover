@@ -4,8 +4,8 @@
     "pages/new/index"
   ],
   "window": {
-    "navigationBarTitleText": "Wechat Todo App",
+    "navigationBarTitleText": "谁是卧底小程序",
     "navigationBarBackgroundColor": "#323239"
   },
-  "sitemapLocation": "sitemap0.json"
+  "sitemapLocation": "sitemap64.json"
 }

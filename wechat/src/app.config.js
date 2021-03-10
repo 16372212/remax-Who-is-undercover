@@ -4,7 +4,7 @@ const pages = ['pages/index/index', 'pages/new/index'];
 module.exports = {
   pages,
   window: {
-    navigationBarTitleText: 'Wechat Todo App',
+    navigationBarTitleText: '谁是卧底小程序',
     navigationBarBackgroundColor: backgroundColor
   }
 };

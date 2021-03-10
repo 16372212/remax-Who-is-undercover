@@ -1,21 +1,25 @@
 .add-button {
-  display: inline-block;
-  background: none;
-  color: #FFF;
-  border: none;
-  width: 300rpx;
+    display: block;
 
-}
-
-.add-button::after {
-  content: unset;
-}
-
-.add-icon {
-  font-size: 52rpx;
-  color: #00FFD6;
-  margin-right: 10rpx;
-}
+    color: rgb(245, 242, 233);
+    border: none;
+    width: 320rpx;
+    height: 75rpx;
+    border-radius: 1.6em; 
+    background-color: #d49ceb60;
+    box-shadow: 0 5rpx 20rpx rgba(212, 125, 247, 0.438);
+  }
+  
+  .add-button::after {
+    content: unset;
+  }
+  
+  .add-icon {
+    font-size: 50rpx;
+    color: #00FFD6;
+    margin-right: 10rpx;
+  }
+  
 
 /* page {
   flex: 1;
@@ -30,8 +34,10 @@ page {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #323239;
-  color: #454d64;
+  background-image: url("https://amzimg.com/2021/03/08/58c816d6304a1.jpg");
+  background-size: 100%;
+  /* background-color: #323239; */
+  /* color: #454d64; */
   /* box-sizing: border-box; */
 }
 .content {

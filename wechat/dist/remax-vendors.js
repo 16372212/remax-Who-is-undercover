@@ -34981,7 +34981,14 @@ var App = function App(_ref) {
       roomInformation = _React$useState6[0],
       setRoomInfo = _React$useState6[1];
 
-  var _React$useState7 = react__WEBPACK_IMPORTED_MODULE_0__["useState"]({
+  var _React$useState7 = react__WEBPACK_IMPORTED_MODULE_0__["useState"](false),
+      _React$useState8 = _slicedToArray(_React$useState7, 2),
+      onGame = _React$useState8[0],
+      setOnGame = _React$useState8[1]; // 判断用户是否在游戏中，若在，则再次进入房间时，不回产生请求
+
+
+  var _React$useState9 = react__WEBPACK_IMPORTED_MODULE_0__["useState"]( // 没用的参数，可以删
+  {
     masteropen_id: "default userName",
     // the number of Room
     password: "default password",
@@ -34991,9 +34998,9 @@ var App = function App(_ref) {
     playerList: null,
     state: null
   }),
-      _React$useState8 = _slicedToArray(_React$useState7, 2),
-      items = _React$useState8[0],
-      setItems = _React$useState8[1];
+      _React$useState10 = _slicedToArray(_React$useState9, 2),
+      items = _React$useState10[0],
+      setItems = _React$useState10[1];
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](TodoContext.Provider, {
     value: {
@@ -35004,7 +35011,9 @@ var App = function App(_ref) {
       roomSetting: roomSetting,
       setRoomSetting: setRoomSetting,
       roomInformation: roomInformation,
-      setRoomInfo: setRoomInfo
+      setRoomInfo: setRoomInfo,
+      onGame: onGame,
+      setOnGame: setOnGame
     }
   }, children);
 };
@@ -35013,10 +35022,10 @@ var App = function App(_ref) {
 
 /***/ }),
 
-/***/ "./src/components/AddButton/index.tsx":
-/*!********************************************!*\
-  !*** ./src/components/AddButton/index.tsx ***!
-  \********************************************/
+/***/ "./src/components/ShineButton/index.tsx":
+/*!**********************************************!*\
+  !*** ./src/components/ShineButton/index.tsx ***!
+  \**********************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -35025,7 +35034,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var remax_wechat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! remax/wechat */ "./node_modules/remax/wechat.js");
-/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.css */ "./src/components/AddButton/index.css");
+/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.css */ "./src/components/ShineButton/index.css");
 /* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_2__);
 
 
@@ -35040,7 +35049,7 @@ var AddButton = function AddButton(_ref) {
     onClick: onClick
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Text"], {
     className: "add-icon"
-  }, "+"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Text"], null, text));
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Text"], null, text));
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (AddButton);
@@ -35063,8 +35072,11 @@ var salt = "123456";
 var server = "http://81.70.201.7:9205";
 var WxLoginUrl = server + "/user/wx_login";
 var UpdateUserInfoUrl = server + "/user/update_userInfo";
-function WxPostRequest(url, header, data, successFunc, requestFailFunc, responseFailFunc) {
-  console.log("*********", url, ": *********");
+function WxPostRequest(url, header, data, successFunc, requestFailFunc, responseFailFunc, refresh) {
+  if (!refresh) {
+    console.log("***", url, ":***");
+  }
+
   var reqDataJsonString = JSON.stringify(data);
   var temp_data = {
     "data": reqDataJsonString,
@@ -35077,8 +35089,10 @@ function WxPostRequest(url, header, data, successFunc, requestFailFunc, response
     data: temp_data,
     method: 'POST',
     success: function success(res) {
-      console.log("##", temp_data, " is request data in hook/wxPostRequest");
-      console.log(header, "请求返回的值: ", res);
+      if (!refresh) {
+        console.log("请求的数据：", temp_data, " is request data in hook/wxPostRequest");
+        console.log("请求返回的值: ", res);
+      }
 
       if (res.data.Success) {
         console.log(url + ": success");
@@ -35090,7 +35104,7 @@ function WxPostRequest(url, header, data, successFunc, requestFailFunc, response
         console.log(url + ": response fail, msg: " + res.data.Message);
 
         if (responseFailFunc) {
-          responseFailFunc();
+          responseFailFunc(res.data.Message);
         }
       }
     },

@@ -242,22 +242,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var remax_wechat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! remax/wechat */ "./node_modules/remax/wechat.js");
 /* harmony import */ var clsx__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! clsx */ "./node_modules/clsx/dist/clsx.m.js");
 /* harmony import */ var _hooks_useUserInfo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../hooks/useUserInfo */ "./src/hooks/useUserInfo.js");
-/* harmony import */ var _components_AddButton__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/components/AddButton */ "./src/components/AddButton/index.tsx");
+/* harmony import */ var _components_ShineButton__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/components/ShineButton */ "./src/components/ShineButton/index.tsx");
 /* harmony import */ var _components_LoginButton__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/components/LoginButton */ "./src/components/LoginButton/index.js");
 /* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @/app */ "./src/app.js");
 /* harmony import */ var _assets_logo_png__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @/assets/logo.png */ "./src/assets/logo.png");
-/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./index.css */ "./src/pages/index/index.css");
-/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! anna-remax-ui */ "./node_modules/anna-remax-ui/esm/index.js");
-/* harmony import */ var _hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../hooks/wxPostRequest */ "./src/hooks/wxPostRequest.js");
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
+/* harmony import */ var _assets_none_png__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @/assets/none.png */ "./src/assets/none.png");
+/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./index.css */ "./src/pages/index/index.css");
+/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! anna-remax-ui */ "./node_modules/anna-remax-ui/esm/index.js");
+/* harmony import */ var _hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../hooks/wxPostRequest */ "./src/hooks/wxPostRequest.js");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -280,6 +273,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
+
+ // import { Swiper, SwiperSlide } from 'swiper/react';
 
 
 var DefaultPostHeader = {
@@ -311,12 +306,6 @@ var RestartGameUrl = server + "/game/restart_game";
 var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/hooks/wxGetUserInfo.js");
 
 /* harmony default export */ __webpack_exports__["default"] = (function () {
-  var _useUserInfo = Object(_hooks_useUserInfo__WEBPACK_IMPORTED_MODULE_4__["default"])(),
-      _useUserInfo2 = _slicedToArray(_useUserInfo, 2),
-      user = _useUserInfo2[0],
-      login = _useUserInfo2[1]; // 登录按钮
-
-
   var todo = react__WEBPACK_IMPORTED_MODULE_1__["useContext"](_app__WEBPACK_IMPORTED_MODULE_7__["TodoContext"]);
 
   var _React$useState = react__WEBPACK_IMPORTED_MODULE_1__["useState"](0),
@@ -337,13 +326,13 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
       setPlayerNums = _React$useState6[1]; // roomSetting
 
 
-  var _React$useState7 = react__WEBPACK_IMPORTED_MODULE_1__["useState"](),
+  var _React$useState7 = react__WEBPACK_IMPORTED_MODULE_1__["useState"](1),
       _React$useState8 = _slicedToArray(_React$useState7, 2),
       spy_num = _React$useState8[0],
       setspy_num = _React$useState8[1]; // roomSetting
 
 
-  var _React$useState9 = react__WEBPACK_IMPORTED_MODULE_1__["useState"](),
+  var _React$useState9 = react__WEBPACK_IMPORTED_MODULE_1__["useState"](0),
       _React$useState10 = _slicedToArray(_React$useState9, 2),
       blank_num = _React$useState10[0],
       setblank_num = _React$useState10[1]; // roomSetting
@@ -362,16 +351,39 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
 
 
   var globalDatas = todo.globalData;
-  Object(_remax_runtime__WEBPACK_IMPORTED_MODULE_0__["usePageEvent"])('onLoad', function () {
+  Object(_remax_runtime__WEBPACK_IMPORTED_MODULE_0__["usePageEvent"])('onShareAppMessage', function (res) {
+    console.log("转发！");
+
+    if (res.from === 'button') {
+      // 说明是通过邀请得到的
+      return {
+        title: '朋友邀请您玩谁是卧底！',
+        path: 'pages/index/index?room_ID=' + todo.roomInformation.roomId,
+        success: function success(res) {// 转发成功
+        },
+        fail: function fail(res) {// 转发失败
+        }
+      };
+      console.log(res.target);
+    } else {
+      // 正常转发
+      return {
+        title: '朋友邀请您玩谁是卧底！',
+        path: 'pages/index/index'
+      };
+    }
+  });
+  Object(_remax_runtime__WEBPACK_IMPORTED_MODULE_0__["usePageEvent"])('onLoad', function (option) {
+    console.log("============", option);
     wx.showLoading({
       title: '登录中',
       mask: true
-    });
-    console.log("---onLoad---");
+    }); // 1 首先获取用户UserInfo
+
     wxGetUserInfo.api.requestApi(1).then(function (res_userInfo) {
-      //成功回调函数，已获取UserInfo信息
+      // 成功回调函数，已获取UserInfo信息(无后端交流)
       var temp_data = {};
-      temp_data.userInfo = res_userInfo.userInfo; // 获取用户ID
+      temp_data.userInfo = res_userInfo.userInfo; // 2 获取用户ID
 
       return new Promise(function (resolve, reject) {
         wx.login({
@@ -399,15 +411,15 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
                 });
               };
 
-              var responseFailFunc = function responseFailFunc() {
+              var responseFailFunc = function responseFailFunc(message) {
                 wx.showToast({
-                  title: '登录失败',
+                  title: message,
                   icon: 'none'
                 });
-              }; // console.log("run onLoad CallBack");
+              };
 
-
-              Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__["default"])(WxLoginUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+              console.log("run onLoad CallBack");
+              Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(WxLoginUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc, false);
             }
           },
           fail: function fail(res) {
@@ -422,8 +434,42 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
         tempId: res.id,
         userInfo: JSON.stringify(res.userInfo)
       };
-      console.log("updateUserInfo: ", data);
-      Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__["default"])(UpdateUserInfoUrl, DefaultPostHeader, data);
+      console.log("用户信息: ", data);
+
+      var successFunc = function successFunc(resp) {
+        // 新加入的这个已经成功传入了
+        if (option && option.room_ID) {
+          // 判断用户是不是被邀请来的，如果是，就直接进入房间
+          wx.showToast({
+            title: '正在进入房间' + option.room_ID,
+            icon: 'none'
+          });
+          console.log(res.id, " 正在进入的房间 ", option.room_ID);
+          inputRoomID(option.room_ID);
+          var _data = {
+            id: res.id,
+            userInfo: res.userInfo
+          };
+          todo.setGlobalData(_data);
+          enterRoom(option.room_ID, res.id);
+        }
+      };
+
+      var requestFailFunc = function requestFailFunc() {
+        wx.showToast({
+          title: '服务器维护中',
+          icon: 'none'
+        });
+      };
+
+      var responseFailFunc = function responseFailFunc(message) {
+        wx.showToast({
+          title: message,
+          icon: 'none'
+        });
+      };
+
+      Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(UpdateUserInfoUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc, false);
     }).catch(function (res) {
       //失败回调函数
       wx.hideLoading();
@@ -439,21 +485,17 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     var data = {};
     data.tempId = globalDatas.id;
     data.roomSetting = JSON.stringify(roomSetting);
-    console.log("create new room: ", data); // 构建请求，得到roomID, 用roomID进入新房间
+    console.log("create room申请数据： ", data); // 构建请求，得到roomID, 用roomID进入新房间
 
     var successFunc = function successFunc(resp) {
-      console.log("返回的房间数据: ", resp); // 构建房间返回的数据，更新todo.roomInfo
+      // todo.setOnGame(true); // 进入房间
+      console.log("create room返回数据: ", resp); // 构建房间返回的数据，更新todo.roomInfo
 
       if (resp.Data != null && resp.Data.roomId != null) {
-        console.log(resp.Data.roomId); // inputRoomID(resp.Data.roomId);
-        // console.log("创建了新的房间的ID，这个ID是: ",room_ID);   // 这里应该搞一个回调，room_ID也是没用的数据
-        // resp.Data.roomInfo就是返回的数据
-        // enterRoom(resp.Data.roomId); 
-
         todo.setRoomInfo(resp.Data);
         Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
           url: '../new/index'
-        }); // 跳f转链接应该使用promise？ 可以后来再实现promise,运行好createNewRoom之后才跳转
+        });
       }
     };
 
@@ -464,34 +506,50 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
       });
     };
 
-    var responseFailFunc = function responseFailFunc() {
+    var responseFailFunc = function responseFailFunc(message) {
       wx.showToast({
-        title: '登录失败',
+        title: message,
         icon: 'none'
       });
     };
 
     console.log("run onLoad CallBack");
-    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__["default"])(CreateNewRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(CreateNewRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc, false);
   } // 向API输入要加入房间的ID，得到房间roomInfo
 
 
-  function enterRoom(tmp_roomID) {
+  function enterRoom(id_of_room, userid) {
     var data = {};
     data.tempId = globalDatas.id; // 用户ID
 
-    data.roomId = tmp_roomID; // 房间ID
+    if (userid) {
+      data.tempId = userid;
+    }
 
-    console.log("in a room: ", data);
+    if (id_of_room) {
+      data.roomId = id_of_room; // 输入的房间的ID
+    } else {
+      data.roomId = room_ID;
+    }
+
+    console.log("enter room 申请数据: ", data);
 
     var successFunc = function successFunc(resp) {
-      console.log("新房间的信息: ", resp); // 构建房间返回的数据，更新todo.roomInfo
+      console.log("enter room返回数据: ", resp); // todo.setOnGame(true);
+      // 构建房间返回的数据，更新todo.roomInfo
 
       if (resp.Data != null) {
-        todo.setRoomInfo.apply(todo, _toConsumableArray(resp.Data)); // resp.Data信息需要轮询访问，每过一段时间访问一次
-        // inputRoomID(resp.Data.roomId);
+        resp.Data.roomId = room_ID;
+        todo.setRoomInfo(resp.Data); // resp.Data信息需要轮询访问，每过一段时间访问一次
 
-        console.log(111, " before enter room, info is ", resp.Data);
+        console.log("这时候跳转界面", resp.Data);
+        Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
+          url: '../new/index'
+        });
+      } else {
+        Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
+          url: '../new/index'
+        });
       }
     };
 
@@ -502,41 +560,53 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
       });
     };
 
-    var responseFailFunc = function responseFailFunc() {
+    var responseFailFunc = function responseFailFunc(message) {
       wx.showToast({
-        title: '登录失败',
+        title: message,
         icon: 'none'
       });
     };
 
-    console.log("run onLoad CallBack");
-    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_11__["default"])(EnterRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
+    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(EnterRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc);
   }
 
   var handleCreate = function handleCreate() {
-    // var temp_items = todo.items; // items都可以删掉
-    // temp_items.userName = user? user.nickName:"none";
-    // temp_items.playerNums = player_nums;
-    // temp_items.password = room_password_create;
-    // temp_items.loginSuccess = user? true:false;
-    // todo.setItems(temp_items);
-    var temp_roomSetting = todo.roomSetting;
-    temp_roomSetting.total_num = player_nums;
-    temp_roomSetting.spy_num = spy_num;
-    temp_roomSetting.blank_num = blank_num;
-    todo.setRoomSetting(temp_roomSetting);
-    console.log("index| globaldata： ", todo.globalData);
-    console.log("index| after setting, todo.roomSetting: ", todo.roomSetting);
-    createNewRoom(temp_roomSetting); // 后端接口: 创建房间，返回房间ID，再利用ID从后端接口得到房间信息
+    // 判断用户是否在游戏中，在就直接进入房间，不在则调用后端接口创建房间
+    if (todo.onGame) {
+      // 用户不在房间中
+      wx.showToast({
+        title: '您正在游戏中,正在为您返回该房间',
+        icon: 'none'
+      });
+      Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
+        url: '../new/index'
+      });
+    } else {
+      var temp_roomSetting = todo.roomSetting;
+      temp_roomSetting.total_num = player_nums;
+      temp_roomSetting.spy_num = spy_num;
+      temp_roomSetting.blank_num = blank_num;
+      todo.setRoomSetting(temp_roomSetting);
+      console.log("index| globaldata： ", todo.globalData);
+      console.log("index| after setting, todo.roomSetting: ", todo.roomSetting);
+      createNewRoom(temp_roomSetting); // 后端接口: 创建房间，返回房间ID，再利用ID从后端接口得到房间信息
+    }
   }; // 进入房间
 
 
   var handleIn = function handleIn() {
-    enterRoom(); // 利用ID从后端接口得到房间信息
-
-    Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
-      url: '../new/index'
-    }); // promise 这里也应该是先赋值后再navigate
+    if (todo.onGame) {
+      // 用户在游戏中
+      wx.showToast({
+        title: '您正在游戏中,正在为您返回该房间',
+        icon: 'none'
+      });
+      Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
+        url: '../new/index'
+      }); // promise 这里也应该是先赋值后再navigate
+    } else {
+      enterRoom(); // 利用ID从后端接口得到房间信息
+    }
   };
 
   var ajaxTry = function ajaxTry() {
@@ -548,28 +618,19 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     className: "top-yellow-background"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
     className: "user"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_LoginButton__WEBPACK_IMPORTED_MODULE_6__["default"], {
-    login: login
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Image"], {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_LoginButton__WEBPACK_IMPORTED_MODULE_6__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Image"], {
     className: "avatar",
-    src: user != null ? user.avatar : _assets_logo_png__WEBPACK_IMPORTED_MODULE_8__["default"]
+    src: globalDatas.userInfo != null ? globalDatas.userInfo.avatarUrl : _assets_logo_png__WEBPACK_IMPORTED_MODULE_8__["default"]
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
     className: "nickname"
-  }, user ? user.nickName + " here" : "Please login!", !user && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
-    className: "login-tip"
-  }, "(Tap to login \u2191)"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__["Button"], {
-    Plain: "primary",
-    plain: "true",
-    color: "black",
-    onTap: ajaxTry
-  }, "ajax"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+  }, globalDatas.userInfo ? globalDatas.userInfo.nickName + " here" : "稍等正在登录~")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
     className: "todo-footer"
-  }, user && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  }, globalDatas.userInfo && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_ShineButton__WEBPACK_IMPORTED_MODULE_5__["default"], {
     text: "\u521B\u5EFA\u623F\u95F4",
     onClick: function onClick() {
       return setCount(2);
     }
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__["Popup"], {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Popup"], {
     open: count == 2,
     curve: "ease",
     onClose: function onClose() {
@@ -577,61 +638,62 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
     style: {
-      height: "700rpx",
+      height: "600rpx",
+      width: "400rpx",
       padding: "10rpx 25rpx",
       backgroundColor: "#323239"
     }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-text"
-  }, "\u5F00\u59CB\u521B\u5EFA\u623F\u95F4:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
+  }, "\u5F00\u59CB\u521B\u5EFA\u623F\u95F4: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+    className: "normal_stepper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-small-text"
-  }, "\u623F\u95F4\u4EBA\u6570:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
-    className: "add-todo-input",
-    placeholder: "number of players?",
-    onInput: function onInput(e) {
-      return setPlayerNums(parseInt(e.detail.value));
-    },
-    value: parseInt(player_nums)
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
+  }, "\u623F\u95F4\u4EBA\u6570: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Stepper"], {
+    plain: true,
+    value: player_nums,
+    onChange: function onChange(val) {
+      return setPlayerNums(parseInt(val));
+    }
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+    className: "normal_stepper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-small-text"
-  }, "\u8BBE\u7F6E\u5BC6\u7801"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
-    className: "add-todo-input",
-    placeholder: "please set password of your room",
-    onInput: function onInput(e) {
-      return setRoomPassword(e.detail.value);
-    },
-    value: room_password_create
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
+  }, "\u767D\u677F\u4E2A\u6570: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Stepper"], {
+    plain: true,
+    value: blank_num,
+    min: 0,
+    max: player_nums - 1,
+    onChange: function onChange(val) {
+      return setblank_num(parseInt(val));
+    }
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+    className: "normal_stepper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-small-text"
-  }, "\u767D\u677F\u4E2A\u6570"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
-    className: "add-todo-input",
-    placeholder: "please set blank_num nums",
-    onInput: function onInput(e) {
-      return setblank_num(parseInt(e.detail.value));
-    },
-    value: parseInt(blank_num)
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
-    className: "InGame-small-text"
-  }, "\u5367\u5E95\u4E2A\u6570"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
-    className: "add-todo-input",
-    placeholder: "please set password of your room",
-    onInput: function onInput(e) {
-      return setspy_num(parseInt(e.detail.value));
-    },
-    value: parseInt(spy_num)
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__["Button"], {
+  }, "\u5367\u5E95\u4E2A\u6570: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Stepper"], {
+    plain: true,
+    value: spy_num,
+    min: 1,
+    max: player_nums - 1 - blank_num,
+    onChange: function onChange(val) {
+      return setspy_num(parseInt(val));
+    }
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+    className: "normal_stepper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Button"], {
     Plain: "primary",
     plain: "true",
     color: "black",
     onTap: handleCreate
-  }, "\u521B\u5EFA\u623F\u95F4\uFF01")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+  }, "\u521B\u5EFA\u623F\u95F4\uFF01"))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
     className: "todo-footer"
-  }, user && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_AddButton__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  }, globalDatas.userInfo && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_ShineButton__WEBPACK_IMPORTED_MODULE_5__["default"], {
     text: "\u52A0\u5165\u623F\u95F4",
     onClick: function onClick() {
       return setCount(3);
     }
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__["Popup"], {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Popup"], {
     open: count == 3,
     curve: "ease",
     onClose: function onClose() {
@@ -645,9 +707,9 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-text"
-  }, "\u623F\u95F4ID\u548C\u5BC6\u7801:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
+  }, "\u623F\u95F4ID\u548C\u5BC6\u7801: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-small-text"
-  }, "\u623F\u95F4ID"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
+  }, "\u623F\u95F4ID "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
     className: "add-todo-input",
     placeholder: "number of players?",
     onInput: function onInput(e) {
@@ -656,19 +718,38 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     value: room_ID
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
     className: "InGame-small-text"
-  }, "\u5BC6\u7801"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
+  }, "\u5BC6\u7801 "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
     className: "add-todo-input",
     placeholder: "password of your room?",
     onInput: function onInput(e) {
       return inputRoomPassword(e.detail.value);
     },
     value: room_password_user
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_10__["Button"], {
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Button"], {
     type: "primary",
     plain: true,
     color: "black",
     onTap: handleIn
-  }, "\u8FDB\u5165")))));
+  }, "\u8FDB\u5165")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+    className: "bottom"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"]("swiper", {
+    "indicator-dots": "true",
+    circular: "true",
+    autoplay: "true",
+    width: "100%",
+    interval: "2000",
+    duration: "500",
+    current: "0"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"]("swiper-item", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Image"], {
+    src: "http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg",
+    mode: "widthFix"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"]("swiper-item", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Image"], {
+    src: "http://bing.getlove.cn/bingImage",
+    width: "100%"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"]("swiper-item", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Image"], {
+    src: _assets_none_png__WEBPACK_IMPORTED_MODULE_9__["default"],
+    width: "100%"
+  })))));
 });
 
 /***/ }),

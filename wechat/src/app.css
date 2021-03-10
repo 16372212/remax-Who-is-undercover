@@ -11,8 +11,10 @@ page {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #323239;
-  color: #454d64;
+  background-image: url("https://amzimg.com/2021/03/08/58c816d6304a1.jpg");
+  background-size: 100%;
+  /* background-color: #323239; */
+  /* color: #454d64; */
   /* box-sizing: border-box; */
 }
 .content {

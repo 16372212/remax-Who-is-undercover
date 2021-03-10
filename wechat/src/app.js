@@ -49,8 +49,10 @@ const App = ({ children }) => { // 默认input
       
     }
   );
+
+  const [onGame, setOnGame] = React.useState(false); // 判断用户是否在游戏中，若在，则再次进入房间时，不回产生请求
   
-  const [items, setItems] = React.useState(
+  const [items, setItems] = React.useState( // 没用的参数，可以删
     { masteropen_id: "default userName", // the number of Room
       password:"default password", // password
       loginSuccess: false,
@@ -71,6 +73,8 @@ const App = ({ children }) => { // 默认input
         setRoomSetting,
         roomInformation,
         setRoomInfo,
+        onGame, 
+        setOnGame
       }}
     >
       {children}
