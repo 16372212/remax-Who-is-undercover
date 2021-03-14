@@ -1,4 +1,4 @@
-# Quick Start
+# 1 Quick Start
 
 - node.js环境安装
 
@@ -27,7 +27,7 @@
 
 
 
-# 微信开发者工具的使用
+# 2 微信开发者工具的使用
 
 1. 下载微信开发者工具
 
@@ -41,25 +41,25 @@
 
 4. 打开微信开发者工具，选择dict文件打开
 
-###### 其他功能：
+###### 微信小程序的其他功能：
 
 微信开发者工具可以选择真机调试、上传、修改小程序信息（app_ID等），但编译软件使用的还是VScode
 
 
 
-# 用户故事
+# 3 用户故事
 
-![1615710412046](C:\Users\jannyz\AppData\Roaming\Typora\typora-user-images\1615710412046.png)
+![1615710412046](https://riyugo.com/i/2021/03/14/xktnry.png)
 
 
 
-# 架构与技术总述
+# 4 架构与技术总述
 
 Web前端为基于Remax框架的单页面应用。UI采用了anna-remax-ui，以及wechat自带的一些基础组件
 
-![img](file:///C:/Users/jannyz/AppData/Local/Temp/msohtmlclip1/01/clip_image002.png)
+![img](https://riyugo.com/i/2021/03/14/xlihup.png)
 
-#### 前端本地的数据
+#### 4.1 前端本地的数据
 
 接口规范见后端设计文档。本地会暂存一些数据和变量，以便组件的渲染和对后端的传递。
 
@@ -98,25 +98,17 @@ const [roomSetting, setRoomSetting] = React.useState({
 })
 ```
 
-
-
 ##### 3 房间具体信息
 
-```
+```js
   const [roomInformation, setRoomInfo] = React.useState(
-    { roomId:"", // 这个ID并没有返回
+    { roomId:"", 
       roomInfo:{
         begin_player: "",
         room_setting: {spy_num:1,blank_num:1,total_num:7},
-        master_open_id:"000000", // string 房主的open_id
+        master_open_id:"", // string 房主的open_id
         player_list:[
-          {open_id:"000000",nick_name:"user0",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:0},
-          {open_id:"000001",nick_name:"user1",avatar_url:"null",state:"Ready",word:"word2",role:"Spy",number:1},
-          {open_id:"000002",nick_name:"user2",avatar_url:"null",state:"Ready",word:"",role:"Blank",number:2},
-          {open_id:"000003",nick_name:"user3",avatar_url:"null",state:"Wait",word:"word1",role:"Normal",number:3},
-          {open_id:"000004",nick_name:"user4",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:4},
-          {open_id:"000005",nick_name:"user5",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:5},
-        ], // player[] : open_id,nick_name,avatar_url, state, word, role, number
+          {open_id:"000000",nick_name:"user0",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:0},], // player[] : open_id,nick_name,avatar_url, state, word, role, number
         state:"Ready", // enum[Open, Wait, Ready, Playing]
         word:{
           id:"01", // string
@@ -134,9 +126,27 @@ const [roomSetting, setRoomSetting] = React.useState({
 
 
 
-接口所需数据皆是JSON格式。（需将整个JSON转成字符串格式，再进行加密。从而才能使用request进行数据的传递）
+##### 4 判断用户是否在游戏中的变量
 
-#### 同后端的交互——request
+```js
+const [onGame, setOnGame] = React.useState(false); // 判断用户是否在游戏中，若在，则再次进入房间时，不回产生请求
+```
+
+
+
+
+
+#### 4.2 同后端的交互——request
+
+请求的data数据：（接口所需数据皆是JSON格式。需将传输的数据转成纯字符串格式，再进行加密，将这两部分合成一个JSON）
+
+```js
+let reqDataJsonString = JSON.stringify(data); // 需要传输的data必须是字符串的形式
+let temp_data = {
+    "data": reqDataJsonString,
+    "sign": md5.hexMD5( ... ), // 加密
+}
+```
 
 ```js
 wx.request({
@@ -159,7 +169,7 @@ wx.request({
 
 
 
-#### 异步的解决办法：
+#### 4.3 异步的解决办法：
 
 由于对后端的请求相对复杂，请求之间需要保证一定的相对顺序，因此多次会涉及多次回调。为了美化多次回调的代码风格，采用Promise来实现请求的同步。
 
@@ -182,7 +192,7 @@ wxGetUserInfo.api.requestApi(1)
 
 
 
-#### 快速响应
+#### 4.4 快速响应
 
 ​	由于涉及到用户之间的同步与异步，当有新用户进入房间后，需要及时通知其他人员，因此后端房间的数据变化需要及时传递给前端。前端使用一个`setInterval`与`clearInterval（interval）`函数来实现定时向后端轮询数据。
 
@@ -203,7 +213,7 @@ function startInter(){
 
 
 
-#### Remax /（React）的及时渲染
+#### 4.5 Remax /（React）的及时渲染
 
 remax使用的是基于react的框架，因此一些语法可以完全沿用过来。hook以及TODO涉及到的参数的改变都会导致页面的重新渲染。
 
@@ -227,4 +237,3 @@ setCount(3) // 然后直接调用这个方法就可以直接赋值给text了
 
 
  
-
