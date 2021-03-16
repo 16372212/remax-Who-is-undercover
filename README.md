@@ -52,7 +52,6 @@
 ![1615710412046](https://riyugo.com/i/2021/03/14/xktnry.png)
 
 
-
 # 4 架构与技术总述
 
 Web前端为基于Remax框架的单页面应用。UI采用了anna-remax-ui，以及wechat自带的一些基础组件
@@ -232,7 +231,12 @@ setCount(3) // 然后直接调用这个方法就可以直接赋值给text了
 
 ###### react中的参数传递——TODO：（父子页面之间传递，当父改变，子界面的该参数也随之改变）
 
+# 5 代码逻辑
 
+[![onload.png](https://i.postimg.cc/CL4pmyKh/onload.png)](https://postimg.cc/BXtznVDk)
+
+第一个界面重点方法逻辑：
+[![image.png](https://i.postimg.cc/v8LKdrwX/image.png)](https://postimg.cc/Jt0xNBnB)
 
 
 
