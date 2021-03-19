@@ -20,10 +20,11 @@ export default () => {
     }); 
     return(
         <View className="card rule-card">
-            <View className="white-text">你的词:</View>
+            <View className="white-text">谁是卧底 . 游戏规则:</View>
             <View className="special-bottom">
-              {myPicImage}
+              <View>本游戏为谁是卧底发牌器，所以玩家都准备好后，房主才可以开始房间</View>
             </View>
         </View>
     ); 
 };
+

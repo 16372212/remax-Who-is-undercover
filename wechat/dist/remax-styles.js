@@ -81,18 +81,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = (__webpack_require__.p + "9900982ab228cb1df3b32f250076480e.png");
-
-/***/ }),
-
-/***/ "./src/components/ShineButton/index.css":
-/*!**********************************************!*\
-  !*** ./src/components/ShineButton/index.css ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-// extracted by mini-css-extract-plugin
+/* harmony default export */ __webpack_exports__["default"] = (__webpack_require__.p + "5be20cbe1e149cbcb71986a40e09ef84.png");
 
 /***/ })
 

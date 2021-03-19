@@ -1,4 +1,27 @@
 @import "./../../remax-styles.wxss";
+.add-button {
+    display: block;
+
+    color: rgb(245, 242, 233);
+    border: none;
+    width: 320rpx;
+    height: 75rpx;
+    border-radius: 1.6em; 
+    background-color: #d49ceb60;
+    box-shadow: 0 5rpx 20rpx rgba(212, 125, 247, 0.438);
+  }
+  
+  .add-button::after {
+    content: unset;
+  }
+  
+  .add-icon {
+    font-size: 50rpx;
+    color: #00FFD6;
+    margin-right: 10rpx;
+  }
+  
+
 .login-button {
   display: inline-block;
   background: none;
@@ -132,6 +155,17 @@
 .InGame-small-text {
   font-size: 33rpx;
   color: #f3daa7;
+}
+
+.InGame-small-white-text {
+  font-size: 33rpx;
+  color: #f5f5ee;
+}
+
+.InGame-white-text {
+  font-size: 43rpx;
+  color: #f7f7f7;
+  font-weight: 80;
 }
 
 .checked .todo-item-text {

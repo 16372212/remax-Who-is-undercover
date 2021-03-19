@@ -109,6 +109,51 @@ var LoginButton = function LoginButton(_ref) {
 
 /***/ }),
 
+/***/ "./src/components/ShineButton/index.css":
+/*!**********************************************!*\
+  !*** ./src/components/ShineButton/index.css ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
+
+/***/ }),
+
+/***/ "./src/components/ShineButton/index.tsx":
+/*!**********************************************!*\
+  !*** ./src/components/ShineButton/index.tsx ***!
+  \**********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var remax_wechat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! remax/wechat */ "./node_modules/remax/wechat.js");
+/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.css */ "./src/components/ShineButton/index.css");
+/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+
+var AddButton = function AddButton(_ref) {
+  var onClick = _ref.onClick,
+      text = _ref.text;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+    className: "add-button",
+    hoverClassName: "none",
+    onClick: onClick
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Text"], {
+    className: "add-icon"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Text"], null, text));
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (AddButton);
+
+/***/ }),
+
 /***/ "./src/hooks/useUserInfo.js":
 /*!**********************************!*\
   !*** ./src/hooks/useUserInfo.js ***!
@@ -373,6 +418,12 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
       };
     }
   });
+  Object(_remax_runtime__WEBPACK_IMPORTED_MODULE_0__["usePageEvent"])('onHide', function (option) {
+    console.log("-----on hide index---");
+  });
+  Object(_remax_runtime__WEBPACK_IMPORTED_MODULE_0__["usePageEvent"])('onUnload', function (option) {
+    console.log("-----on un load index---");
+  });
   Object(_remax_runtime__WEBPACK_IMPORTED_MODULE_0__["usePageEvent"])('onLoad', function (option) {
     console.log("============", option);
     wx.showLoading({
@@ -388,6 +439,7 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
       return new Promise(function (resolve, reject) {
         wx.login({
           success: function success(res) {
+            // wx.hideLoading();
             if (res.code) {
               //发起网络请求
               var data = {
@@ -441,17 +493,21 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
         if (option && option.room_ID) {
           // 判断用户是不是被邀请来的，如果是，就直接进入房间
           wx.showToast({
-            title: '正在进入房间' + option.room_ID,
+            title: '您想进入房间' + option.room_ID,
             icon: 'none'
           });
-          console.log(res.id, " 正在进入的房间 ", option.room_ID);
+          console.log(res.id, " 正在尝试进入的房间 ", option.room_ID);
           inputRoomID(option.room_ID);
           var _data = {
             id: res.id,
             userInfo: res.userInfo
           };
           todo.setGlobalData(_data);
-          enterRoom(option.room_ID, res.id);
+          refreshGame_before_enter(option.room_ID, res.id); // 涉及到如果房间id失效
+        } else {
+          // 用户不是被邀请进来的
+          // 
+          refreshGame_before_enter(null, res.id); // 涉及到，如果房间id失效
         }
       };
 
@@ -472,23 +528,138 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
       Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(UpdateUserInfoUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc, false);
     }).catch(function (res) {
       //失败回调函数
-      wx.hideLoading();
+      // wx.hideLoading()
       wx.showToast({
         title: res.data.msg,
         icon: 'none',
         duration: 2000
       });
     });
-  }); // 输入房间设置信息，得到创建的房间ID, 然后再enterRoom进入该房间
+  });
+
+  function refreshGame_before_enter(res_roomid, res_userid) {
+    // 更新信息，应该是有任何一个页面的行为都应该调用这个链接
+    var data = {};
+    data.tempId = res_userid; // 用户ID
+
+    console.log("refresh请求数据：", data);
+
+    var successFunc = function successFunc(resp) {
+      console.log("refresh返回数据: ", resp);
+
+      if (resp.Data != null && resp.Data.roomInfo != null) {
+        // 属于某房间，直接跳转
+        var new_data = {
+          "roomId": res_roomid,
+          "roomInfo": resp.Data.roomInfo
+        };
+        todo.setRoomInfo(new_data);
+        console.log("找到了属于的房间，正在进入");
+        Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
+          url: '../new/index'
+        });
+      } else {
+        // 不属于任何房间
+        console.log("本身不在房间，需要enter进入");
+
+        if (res_roomid) {
+          // 有邀请链接
+          enterRoom(res_roomid, res_userid);
+        } else {
+          console.log("本人refresh后发现不属于任何房间，且没受邀请"); // 没有邀请链接
+        }
+      }
+    };
+
+    var requestFailFunc = function requestFailFunc() {
+      wx.showToast({
+        title: '服务器维护中',
+        icon: 'none'
+      });
+    };
+
+    var responseFailFunc = function responseFailFunc(message) {
+      // refresh之后发现
+      wx.showToast({
+        title: '房间ID失效了',
+        icon: 'none'
+      });
+      console.log(message);
+      console.log("enter前的refresh失败");
+
+      if (res_roomid) {
+        console.log("但是被邀请了，refresh false也要尝试进入房间啊");
+        enterRoom(res_roomid, res_userid);
+      }
+    };
+
+    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(RefreshRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc, false);
+  }
+
+  function refreshGame_before_create(res_userid, res_roomSetting) {
+    // 更新信息，应该是有任何一个页面的行为都应该调用这个链接
+    // 判断用户是不是在房间里，refresh如果不返回null，则跳转，否则创建
+    var data = {};
+    data.tempId = res_userid;
+    wx.showLoading({
+      title: '更新房间信息中'
+    });
+    console.log("refresh请求数据：", data);
+
+    var successFunc = function successFunc(resp) {
+      // refresh后发现user在房间里，能得到这种信息，则直接进入
+      console.log("refresh返回数据: ", resp);
+
+      if (resp.Data != null && resp.Data.roomInfo != null) {
+        // 更新发现可以收到房间的info，直接跳转
+        var new_data = {
+          "roomId": todo.roomInformation.roomId,
+          "roomInfo": resp.Data.roomInfo
+        };
+        todo.setRoomInfo(new_data);
+        Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
+          url: '../new/index'
+        });
+      } else {
+        // 收不到房间info,说明用户没在房间里面, 则正常create房间
+        console.log("create发现用户没在房间，则调用create");
+        createNewRoom(res_roomSetting);
+      }
+
+      wx.hideLoading();
+    };
+
+    var requestFailFunc = function requestFailFunc() {
+      wx.showToast({
+        title: '服务器维护中',
+        icon: 'none'
+      });
+    };
+
+    var responseFailFunc = function responseFailFunc(message) {
+      // refresh之后发现
+      wx.showToast({
+        title: '房间ID失效',
+        icon: 'none'
+      });
+      console.log("create前的refresh失败");
+      console.log("refresh false也要创建房间啊");
+      console.log(message);
+      createNewRoom(res_roomSetting);
+    };
+
+    Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(RefreshRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc, false);
+  } // 输入房间设置信息，得到创建的房间ID, 然后再enterRoom进入该房间
+
 
   function createNewRoom(roomSetting) {
     var data = {};
-    data.tempId = globalDatas.id;
+    data.tempId = globalDatas.id; // 用户ID
+
     data.roomSetting = JSON.stringify(roomSetting);
     console.log("create room申请数据： ", data); // 构建请求，得到roomID, 用roomID进入新房间
 
     var successFunc = function successFunc(resp) {
-      // todo.setOnGame(true); // 进入房间
       console.log("create room返回数据: ", resp); // 构建房间返回的数据，更新todo.roomInfo
 
       if (resp.Data != null && resp.Data.roomId != null) {
@@ -508,54 +679,45 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
 
     var responseFailFunc = function responseFailFunc(message) {
       wx.showToast({
-        title: message,
+        title: '创建房间失败',
         icon: 'none'
       });
+      console.log(message);
+      console.log("create 失败了");
     };
 
-    console.log("run onLoad CallBack");
     Object(_hooks_wxPostRequest__WEBPACK_IMPORTED_MODULE_12__["default"])(CreateNewRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc, false);
   } // 向API输入要加入房间的ID，得到房间roomInfo
 
 
   function enterRoom(id_of_room, userid) {
     var data = {};
-    data.tempId = globalDatas.id; // 用户ID
+    data.tempId = userid; // 用户ID
 
-    if (userid) {
-      data.tempId = userid;
-    }
-
-    if (id_of_room) {
-      data.roomId = id_of_room; // 输入的房间的ID
-    } else {
-      data.roomId = room_ID;
-    }
-
+    data.roomId = id_of_room;
     console.log("enter room 申请数据: ", data);
 
     var successFunc = function successFunc(resp) {
-      console.log("enter room返回数据: ", resp); // todo.setOnGame(true);
-      // 构建房间返回的数据，更新todo.roomInfo
+      console.log("enter room返回数据: ", resp);
 
       if (resp.Data != null) {
-        resp.Data.roomId = room_ID;
-        todo.setRoomInfo(resp.Data); // resp.Data信息需要轮询访问，每过一段时间访问一次
-
+        // 进入房间成功，并更新房间信息
+        resp.Data.roomId = id_of_room;
+        todo.setRoomInfo(resp.Data);
         console.log("这时候跳转界面", resp.Data);
         Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
           url: '../new/index'
         });
       } else {
-        Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
-          url: '../new/index'
-        });
+        // 没有返回数据，不进入房间了吧
+        // navigateTo({ url: '../new/index'}); 
+        console.log("enter room没返回数据！！！！");
       }
     };
 
     var requestFailFunc = function requestFailFunc() {
       wx.showToast({
-        title: '服务器维护中',
+        title: 'enterRoom服务器维护中',
         icon: 'none'
       });
     };
@@ -571,26 +733,13 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
   }
 
   var handleCreate = function handleCreate() {
-    // 判断用户是否在游戏中，在就直接进入房间，不在则调用后端接口创建房间
-    if (todo.onGame) {
-      // 用户不在房间中
-      wx.showToast({
-        title: '您正在游戏中,正在为您返回该房间',
-        icon: 'none'
-      });
-      Object(remax_wechat__WEBPACK_IMPORTED_MODULE_2__["navigateTo"])({
-        url: '../new/index'
-      });
-    } else {
-      var temp_roomSetting = todo.roomSetting;
-      temp_roomSetting.total_num = player_nums;
-      temp_roomSetting.spy_num = spy_num;
-      temp_roomSetting.blank_num = blank_num;
-      todo.setRoomSetting(temp_roomSetting);
-      console.log("index| globaldata： ", todo.globalData);
-      console.log("index| after setting, todo.roomSetting: ", todo.roomSetting);
-      createNewRoom(temp_roomSetting); // 后端接口: 创建房间，返回房间ID，再利用ID从后端接口得到房间信息
-    }
+    // 先refresh以下，然后判断
+    setCount(1);
+    var temp_roomSetting = todo.roomSetting;
+    temp_roomSetting.total_num = player_nums;
+    temp_roomSetting.spy_num = spy_num;
+    temp_roomSetting.blank_num = blank_num;
+    refreshGame_before_create(globalDatas.id, temp_roomSetting);
   }; // 进入房间
 
 
@@ -611,7 +760,8 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
 
   var ajaxTry = function ajaxTry() {
     var data = {};
-    console.log("app globalData: ", globalDatas); // reuquirePost(WxLoginUrl,data);
+    console.log("app globalData: ", globalDatas);
+    console.log("room information: ", todo.roomInformation); // reuquirePost(WxLoginUrl,data);
   };
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
@@ -631,6 +781,26 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
       return setCount(2);
     }
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Popup"], {
+    open: todo.onGame,
+    curve: "ease",
+    onClose: function onClose() {}
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+    style: {
+      height: "400rpx",
+      width: "600rpx",
+      padding: "10rpx 25rpx",
+      backgroundColor: "#323239"
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
+    className: "InGame-white-text"
+  }, "\u68C0\u6D4B\u51FA\u60A8\u8FD8\u5728\u623F\u95F4\u91CC ")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
+    className: "InGame-small-white-text"
+  }, "\u82E5\u60F3\u9000\u51FA\uFF0C\u8BF7\u5148\u8FD4\u56DE\u623F\u95F4\uFF0C\u518D\u70B9\u51FB\u79BB\u5F00\u6309\u94AE"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
+    className: "normal_stepper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_ShineButton__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    text: "\u8FD4\u56DE\u623F\u95F4",
+    onClick: handleIn
+  })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Popup"], {
     open: count == 2,
     curve: "ease",
     onClose: function onClose() {
@@ -687,50 +857,6 @@ var wxGetUserInfo = __webpack_require__(/*! ../../hooks/wxGetUserInfo */ "./src/
     color: "black",
     onTap: handleCreate
   }, "\u521B\u5EFA\u623F\u95F4\uFF01"))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
-    className: "todo-footer"
-  }, globalDatas.userInfo && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](_components_ShineButton__WEBPACK_IMPORTED_MODULE_5__["default"], {
-    text: "\u52A0\u5165\u623F\u95F4",
-    onClick: function onClick() {
-      return setCount(3);
-    }
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Popup"], {
-    open: count == 3,
-    curve: "ease",
-    onClose: function onClose() {
-      setCount(1);
-    }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
-    style: {
-      height: "500rpx",
-      padding: "10rpx 25rpx",
-      backgroundColor: "#323239"
-    }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
-    className: "InGame-text"
-  }, "\u623F\u95F4ID\u548C\u5BC6\u7801: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
-    className: "InGame-small-text"
-  }, "\u623F\u95F4ID "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
-    className: "add-todo-input",
-    placeholder: "number of players?",
-    onInput: function onInput(e) {
-      return inputRoomID(e.detail.value);
-    },
-    value: room_ID
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Text"], {
-    className: "InGame-small-text"
-  }, "\u5BC6\u7801 "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["Input"], {
-    className: "add-todo-input",
-    placeholder: "password of your room?",
-    onInput: function onInput(e) {
-      return inputRoomPassword(e.detail.value);
-    },
-    value: room_password_user
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](anna_remax_ui__WEBPACK_IMPORTED_MODULE_11__["Button"], {
-    type: "primary",
-    plain: true,
-    color: "black",
-    onTap: handleIn
-  }, "\u8FDB\u5165")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_2__["View"], {
     className: "bottom"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__["createElement"]("swiper", {
     "indicator-dots": "true",

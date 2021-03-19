@@ -7,14 +7,16 @@ import {
   Text, 
   Image
 } from 'remax/wechat';
-import AddButton from '@/components/ShineButton';
+import AddButton from '@/components/AddButton';
 import { TodoContext } from '@/app';
-import {Button, Popup,Tag} from 'anna-remax-ui';
+import {Button, Popup,Tag,Icon} from 'anna-remax-ui';
 import './index.css';
 import { usePageEvent } from 'remax/macro';
 import {useState} from "react";
 import MyCard from "./first-card";
 import MyCard2 from "./second-card";
+import AnswerCard from "./answer-card";
+import RulesCard from "./rules-card";
 import WxPostRequest from '../../hooks/wxPostRequest'
 import logo from '@/assets/logo.png';
 import none from '@/assets/none.png';
@@ -41,47 +43,23 @@ const ReadyGameUrl = server + "/game/ready_game";
 const StartGameUrl = server + "/game/start_game";
 const EndGameUrl = server + "/game/end_game";
 const RestartGameUrl = server + "/game/restart_game";
-
-const normalInfo = 
-{ roomId:"", // 这个ID并没有返回
-  roomInfo:{
-    room_setting: {spy_num:1,blank_num:1,total_num:7},
-    master_open_id:"000000", // string 房主的open_id
-    player_list:[
-      {open_id:"000000",nick_name:"user0",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:0},
-      {open_id:"000001",nick_name:"user1",avatar_url:"null",state:"Ready",word:"word2",role:"Spy",number:1},
-      {open_id:"000002",nick_name:"user2",avatar_url:"null",state:"Ready",word:"",role:"Blank",number:2},
-      {open_id:"000003",nick_name:"user3",avatar_url:"null",state:"Wait",word:"word1",role:"Normal",number:3},
-      {open_id:"000004",nick_name:"user4",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:4},
-      {open_id:"000005",nick_name:"user5",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:5},
-    ], // player[] : open_id,nick_name,avatar_url, state, word, role, number
-    state:"Ready", // enum[Open, Wait, Ready, Playing]
-    word:{
-      id:"01", // string
-      normal:"word1", // string
-      spy:"word2", // string
-      blank:"", // string
-    },
-  word_cache:[],//此房间已经玩过的词汇列表
-  }
-}
+var interval = null;
 
 
 export default () => {
   const todo = React.useContext(TodoContext); // back
   const [test,setTest] = React.useState(100);
   const [seeAnswer,setSeeAnswer] = React.useState(false);
-  // const [leavePage,setLeavePage] = React.useState(100);
-  const [indexRoomInfo, setIndexRoomInfo] = React.useState(todo.roomInformation);
-  var roomInformation = todo.roomInformation;
+  // const [roomInformation,setRoomInfo] = React.use
+  const roomInformation = todo.roomInformation;
   const userId = todo.globalData.id;
-  var interval = null;
+
   usePageEvent('onShareAppMessage',(res)=>{
     console.log("转发！");
     if (res.from === 'button') { // 说明是通过邀请得到的
       return {
         title: '朋友邀请您玩谁是卧底！',
-        path: 'pages/index/index?room_ID='+todo.roomInformation.roomId,
+        path: 'pages/index/index?room_ID='+roomInformation.roomId,
         success: function(res) {
         // 转发成功
         },
@@ -100,19 +78,56 @@ export default () => {
 
   usePageEvent('onLoad', (option) => {
     console.log(" on game!~~~");
+    startInter();
     if(!todo.onGame){ // 没有游戏中的话
       todo.setOnGame(true);
-      // startInter();
     }
   });
 
+  usePageEvent('onHide', (option) => {
+    console.log("-------------new 页面hide------------");
+  });
+  
+  usePageEvent('onUnload', (option) => {
+    console.log("-------------new 页面unload------------");
+    stopInter();
+    // todo.setOnGame(true);
+  });
+
   const leaveHome = () => { // 离开房间后再进入，todo可能对它就是null了，因此最好refresh一下
-    console.log("结束计时");
-    normalPost(ExitRoomUrl);
+    // 判断状态是否是ready, 如果是，则调用ready_game, 然后再调用exit
+    var find = false;
+    for(var i = 0;i<roomInformation.roomInfo.player_list.length;i++){  //循环LIST，实现浅拷贝
+      var veh = roomInformation.roomInfo.player_list[i];
+      console.log("对比",veh.nick_name," ",todo.globalData.userInfo.nick_name);
+      if(veh.nick_name == todo.globalData.userInfo.nickName){ // 其实不应该判断用户的nick_name
+        // return veh.open_id == "Ready";
+        find = true;
+        console.log("找到了这个用户");
+        if(veh.state == "Ready"){
+          console.log("it was ready");
+          let data = {};
+          data.tempId = userId;
+          console.log("执行ready");
+          let successFunc = function (resp) { 
+            console.log("执行exit!");
+            normalPost(ExitRoomUrl);
+          };
+          WxPostRequest(ReadyGameUrl, DefaultPostHeader, data,successFunc);
+        }else{
+          normalPost(ExitRoomUrl); //如果没有准备，就可以直接离开游戏
+        }
+        break;
+      }
+    }
+    navigateBack();
     todo.setOnGame(false);
-    console.log("on game:", todo.onGame);
-    refreshGame(); 
-    // navigateBack();
+    console.log("是否在游戏中:", todo.onGame);
+    if(!find){
+      console.log("你没在这个房间里");
+      normalPost(ExitRoomUrl);
+    }
+    stopInter();
   };
 
   
@@ -126,7 +141,12 @@ export default () => {
   };
 
   const readyGame = () => {
-    console.log("ready game")
+    console.log("ready game");
+    // 放一个加圈圈的
+    wx.showToast({
+      title: '操作成功',
+      icon: 'true'
+    })
     normalPost(ReadyGameUrl);
     refreshGame();
   };
@@ -134,10 +154,9 @@ export default () => {
   // 在房主结束游戏, 显示房间的卧底牌
   const endGame = () => {
     normalPost(EndGameUrl);
-    setSeeAnswer(true);
-    console.log("see answer");
+    // stopInter();
+    // navigateBack();
     // todo.setOnGame(false);
-  
   }
   
   const changeWord = () => {
@@ -146,44 +165,70 @@ export default () => {
   }
 
   const changeState = () =>{
+    console.log("---change state: ---");
     var tmp_info = {};
     tmp_info.roomId = roomInformation.roomId;
     tmp_info.roomInfo = roomInformation.roomInfo;
     
     if(tmp_info.roomInfo.state == "Ready"){
+      console.log("Clearing"); 
+      tmp_info.roomInfo.state = "Clear";
+    }else if(tmp_info.roomInfo.state == "Clear") {
+      console.log("playing"); 
       tmp_info.roomInfo.state = "Playing";
     }else{
       tmp_info.roomInfo.state = "Ready";
+      console.log("Ready"); 
     }
     todo.setRoomInfo(tmp_info);
-    console.log("indexRoomInfo's state changes to ",indexRoomInfo.roomInfo.state);
-
   }
   
   const isNotBegin = () =>{
     // 如果房间的状态等于playing
-    if(roomInformation.roomInfo.state == "Playing"){     
-      return true;
+    if(roomInformation.roomInfo.state == "Ready" ||roomInformation.roomInfo.state == "Clear" ){     
+      return false;
     }
     else{
-      return false;
+      return true;
     }
   }
 
-  const isNotReady = ()=>{
+  const returnYourWord = ()=>{
+    for(var i = 0;i<roomInformation.roomInfo.player_list.length;i++){  //循环LIST，实现浅拷贝
+      var veh =roomInformation.roomInfo.player_list[i];
+      if(veh.open_id == userId || veh.nick_name == todo.globalData.userInfo.nickName){ // 其实不应该判断用户的nick_name
+        // return veh.open_id == "Ready";
+        return veh.word;
+       }
+    }
+    console.log("没有找到您的词");
+    return "?";
+  }
+  
+
+  const isReady = ()=>{
     // 找到用户，并且判断状态
     for(var i = 0;i<roomInformation.roomInfo.player_list.length;i++){  //循环LIST，实现浅拷贝
-      var veh = roomInfo.player_list[i];
+      var veh =roomInformation.roomInfo.player_list[i];
       if(veh.open_id == userId || veh.nick_name == todo.globalData.userInfo.nickName){ // 其实不应该判断用户的nick_name
-        return veh.open_id == "Ready";
+        // return veh.open_id == "Ready";
+        console.log("找到了这个用户");
+        if(veh.state == "Ready"){
+          console.log("用户的状态是ready,现在取消准备");
+          return "取消准备";
+        }else{
+          console.log("用户还没准备，马上！");
+          return "准备";
+        }
       }
     }
-    // 没有从玩家列表中找到用户这个人
-    wx.showLoading({
-      title: '抱歉您暂时不属于这个房间',
-      mask: true
-    });
-    return true;
+    // // 没有从玩家列表中找到用户这个人
+    // wx.showLoading({
+    //   title: '抱歉您暂时不属于这个房间',
+    //   mask: true
+    // });
+    
+    return "观战ing";
   }
 
   const changeRoot = () => {  // react只要props改变，就会重新渲染
@@ -196,6 +241,7 @@ export default () => {
       tmp_info.roomInfo.master_open_id = userId;
     }
     // setIndexRoomInfo(tmp_info);  
+    console.log("change root了");
     todo.setRoomInfo(tmp_info);
   }
 
@@ -212,6 +258,7 @@ export default () => {
     setTest(test+1); // 加上这个就会多刷新一次, 但是临时增加的人的id不会重复
     tmp_info.roomInfo.player_list = userLists;
     todo.setRoomInfo(tmp_info);
+    console.log("add people");
   };
 
   function normalPost(url){
@@ -232,7 +279,8 @@ export default () => {
           "roomId":roomInformation.roomId,
           "roomInfo":resp.Data.roomInfo
         };
-        todo.setRoomInfo(new_data); // resp.Data信息需要轮询访问，每过一段时间访问一次
+        todo.setRoomInfo(new_data); 
+        console.log("------房间状态: ",roomInformation.roomInfo.state,"--> new data: ",new_data.roomInfo.state); 
       }
     };
     let requestFailFunc = function () {
@@ -249,83 +297,94 @@ export default () => {
     };
     WxPostRequest(RefreshRoomUrl, DefaultPostHeader, data, successFunc, requestFailFunc, responseFailFunc,true);
   }
- 
+
   function startInter(){
-    clearInterval(interval);
-    interval = setInterval(function(){
-      refreshGame();  
-    }, 2000); 
+    if(interval){
+      clearInterval(interval);
+      interval = null;
+    }
+    interval = setInterval(refreshGame,1100);//启动计时器，调用overs函数，
+    console.log("启动轮询访问--");
   }
+  
+  function stopInter(){
+    console.log("停止轮询访问--");
+    clearInterval(interval);
+    interval = null;
+  }
+  
 
   return (
-    <View className="top-yellow-background">
-      <View className="content">
+    <View className="total-content">
+      <View className="top-yellow-background">
+        {/* left */}
         <MyCard/>
-        <View className="special-bottom">
-          {roomInformation.roomInfo.is_master? <View className="special-bottom-middle">{"请玩家准备好了在开始"}</View>
-            :<View className="special-bottom-middle">{"请玩家准备=>"}</View>
-          }
-          {roomInformation.roomInfo.is_master?<Button type="primary" plain color="black" disabled={isNotBegin} onTap={beginGame}>开始</Button>:
-            <Button type="primary" plain color="black" disabled={isNotReady} onTap={readyGame}>准备</Button>
-          }
-       
-          <Button Plain="primary" open-type="share" plain="true" color="black">邀请好友</Button> 
-        </View>
-      </View>
-      <Popup
-            open={seeAnswer}
-            curve = "ease"
-            onClose={() => {setSeeAnswer(false)}}> 
-          <View 
-            style={{
-              height: "200rpx",
-              width:"500rpx",
-              padding: "10rpx 25rpx",
-            }}>
-            <Text className="InGame-text">卧底词：{roomInformation.roomInfo.word["SpyWord"]}</Text>
-            {/* 卧底牌，卧底头像，卧底名称，其他人的牌*/}
+
+        {/* mid  */}
+        <View className = "mid-content">
+          <View className="mid-button-content">
+            {roomInformation.roomInfo.is_master?<Button size="superlarge" disabled={isNotBegin()} onTap={beginGame}
+             >开始</Button>:
+              <Button size="superlarge" disabled={roomInformation.roomInfo.state=="Playing"} onTap={readyGame}>{isReady()}</Button>
+            }          
           </View>
-        </Popup>
-
-      {roomInformation.roomInfo.state=="Playing" && <View className = "content">
-        <MyCard2/>
-      </View>}
-
-      {/* {roomInformation.roomInfo.state=="Playing" && endgame的操作 } */}
-      <View>
-        {roomInformation.roomInfo.state == "Playing" && roomInformation.roomInfo.is_master 
-        &&<AddButton text="换卧底词" onClick={changeWord}/> 
-        }
+          <View className="mid-draw-content"> 
+            <View className="staff"></View>
+            {roomInformation.roomInfo.state =="Playing" && <MyCard2/>}
+            {roomInformation.roomInfo.state == "Clear"&&<AnswerCard/>  }
+            {roomInformation.roomInfo.state != "Playing" && roomInformation.roomInfo.state != "Clear"  &&<RulesCard/>  }
+          </View>
+        </View>
         
-        {roomInformation.roomInfo.state == "Playing" && roomInformation.roomInfo.is_master 
-        &&<AddButton text="查看卧底词" onClick={endGame}/> 
-        }
+        {/* left */}
+        <MyCard/>
+      </View>      
+        <View className="low-content">
+          {/* <AddButton text="换卧底词"  disable={roomInformation.roomInfo.state != "Playing"} onClick={changeWord}/>  */}
+          {/* <AddButton text="结束并查看卧底词" disabled={true} onClick={endGame}/>  */}
+          <View className="buttons-view">
+            {roomInformation.roomInfo.is_master 
+            &&<Button plain color="#d1cdda" size="large" disabled={roomInformation.roomInfo.state!="Playing"} onTap={changeWord}
+              icon={<Icon type="forwardfill" size="85px" color="#d1cdda" />}> 换词</Button>}
+            
+            {roomInformation.roomInfo.is_master 
+            &&<Button  plain color="#d1cdda"  size="large" disabled={roomInformation.roomInfo.state!="Playing"} onTap={endGame}
+              icon={<Icon type="creativefill" size="85px" color="#d1cdda" />}>
+              答案
+            </Button>
+            }
+            <Button plain color="#d1cdda"  size="large" disabled={roomInformation.roomInfo.state=="Playing"} onTap={leaveHome}
+              icon={<Icon type="exit" size="85px" color="#d1cdda" />}>
+              退出</Button>
+            {/* <AddButton text="退出房间" disabled={roomInformation.roomInfo.state=="Playing"} onClick={leaveHome} /> */}
+          
+            <Button  plain color="#d1cdda"  size="large" open-type="share" icon={<Icon type="addressbook" size="85px" color="#d1cdda" />}>
+                邀请</Button> 
+          </View>
+          {/* <AddButton text="~开始计时" onClick={startInter}/>  */}
+          {/* <Button onTap={stopInter}>~停止计时</Button>         */}
+          {/* <AddButton text="~更新" onClick={handleRefresh}/>  */}
+          {/* <Button  onTap={changeState}>~改状态</Button> */}
+          {/* <AddButton text="~改房主" onClick={changeRoot}/>  */}
+          {/* <AddButton text="~加用户" onClick={addPeople}/>  */}
+          {/* <Button type="primary" plain color="black" onTap={getRoonInfo}>roomInfo:</Button> */}
+          
+        </View>
 
-        {roomInformation.roomInfo.is_master ?<AddButton text="结束游戏" onClick={leaveHome}/> :
-          <AddButton text="退出房间" onClick={leaveHome} />
-        }
-       
-
-        <AddButton text="~更新" onClick={handleRefresh}/> 
-        <AddButton text="~改状态" onClick={changeState}/>
-        {/* <AddButton text="~改房主" onClick={changeRoot}/>  */}
-        {/* <AddButton text="~加用户" onClick={addPeople}/>  */}
-        {/* <Button type="primary" plain color="black" onTap={getRoonInfo}>roomInfo:</Button> */}
-      </View>
-        
-      <View className="bottom">
-        <swiper indicator-dots="true" circular="true" autoplay="true" interval="2000" duration="500" current="0">
-          <swiper-item>
-              <Image src="http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg" width="100%"></Image>
-          </swiper-item>
-          <swiper-item>
-              <Image src="http://bing.getlove.cn/bingImage" width="100%"></Image>
-          </swiper-item>
-          <swiper-item>
-              <Image src={none} width="100%"></Image>
-          </swiper-item>
-        </swiper> 
-      </View>
+        {/* <View className="bottom">
+          <swiper indicator-dots="true" circular="true" autoplay="true" interval="2000" duration="500" current="0">
+            <swiper-item>
+                <Image src="http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg" width="100%"></Image>
+            </swiper-item>
+            <swiper-item>
+                <Image src="http://bing.getlove.cn/bingImage" width="100%"></Image>
+            </swiper-item>
+            <swiper-item>
+                <Image src={none} width="100%"></Image>
+            </swiper-item>
+          </swiper> 
+        </View> */}
+      
     </View>
   );
 };

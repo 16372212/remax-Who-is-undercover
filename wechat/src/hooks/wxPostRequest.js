@@ -11,6 +11,7 @@ export default function WxPostRequest(url, header, data ,successFunc, requestFai
         "data": reqDataJsonString,
         "sign": md5.hexMD5(salt + reqDataJsonString + salt), 
     }
+    console.log(url,"请求的数据：",temp_data," is request data in hook/wxPostRequest");
     wx.request({
         url: url,
         header: header,
@@ -18,10 +19,9 @@ export default function WxPostRequest(url, header, data ,successFunc, requestFai
         data: temp_data,
         method: 'POST',
         success: function (res) {
-            if(!refresh){
-                console.log("请求的数据：",temp_data," is request data in hook/wxPostRequest");
-                console.log("请求返回的值: ",res);
-            }
+            //if(!refresh){
+                console.log(url,"请求返回的值: ",res);
+            //}
             if (res.data.Success) {
                 console.log(url + ": success");
                 if (successFunc) {
@@ -35,6 +35,7 @@ export default function WxPostRequest(url, header, data ,successFunc, requestFai
             }
         },
         fail: function () {
+            console.log("失败的请求的数据：",temp_data," is request data in hook/wxPostRequest");
             console.log(url + ": request fail in hook/wxPostRequest");
             if (requestFailFunc) {
                 requestFailFunc()

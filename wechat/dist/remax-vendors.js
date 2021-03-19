@@ -34900,7 +34900,7 @@ var App = function App(_ref) {
       setRoomSetting = _React$useState4[1];
 
   var _React$useState5 = react__WEBPACK_IMPORTED_MODULE_0__["useState"]({
-    roomId: "000000",
+    roomId: "",
     // 这个ID并没有返回
     roomInfo: {
       begin_player: "",
@@ -34961,7 +34961,7 @@ var App = function App(_ref) {
         number: 5
       }],
       // player[] : open_id,nick_name,avatar_url, state, word, role, number
-      state: "Ready",
+      state: "123",
       // enum[Open, Wait, Ready, Playing]
       word: {
         id: "01",
@@ -35022,40 +35022,6 @@ var App = function App(_ref) {
 
 /***/ }),
 
-/***/ "./src/components/ShineButton/index.tsx":
-/*!**********************************************!*\
-  !*** ./src/components/ShineButton/index.tsx ***!
-  \**********************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var remax_wechat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! remax/wechat */ "./node_modules/remax/wechat.js");
-/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.css */ "./src/components/ShineButton/index.css");
-/* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_index_css__WEBPACK_IMPORTED_MODULE_2__);
-
-
-
-
-var AddButton = function AddButton(_ref) {
-  var onClick = _ref.onClick,
-      text = _ref.text;
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Button"], {
-    className: "add-button",
-    hoverClassName: "none",
-    onClick: onClick
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Text"], {
-    className: "add-icon"
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"](remax_wechat__WEBPACK_IMPORTED_MODULE_1__["Text"], null, text));
-};
-
-/* harmony default export */ __webpack_exports__["default"] = (AddButton);
-
-/***/ }),
-
 /***/ "./src/hooks/wxPostRequest.js":
 /*!************************************!*\
   !*** ./src/hooks/wxPostRequest.js ***!
@@ -35082,6 +35048,7 @@ function WxPostRequest(url, header, data, successFunc, requestFailFunc, response
     "data": reqDataJsonString,
     "sign": md5.hexMD5(salt + reqDataJsonString + salt)
   };
+  console.log(url, "请求的数据：", temp_data, " is request data in hook/wxPostRequest");
   wx.request({
     url: url,
     header: header,
@@ -35089,10 +35056,8 @@ function WxPostRequest(url, header, data, successFunc, requestFailFunc, response
     data: temp_data,
     method: 'POST',
     success: function success(res) {
-      if (!refresh) {
-        console.log("请求的数据：", temp_data, " is request data in hook/wxPostRequest");
-        console.log("请求返回的值: ", res);
-      }
+      //if(!refresh){
+      console.log(url, "请求返回的值: ", res); //}
 
       if (res.data.Success) {
         console.log(url + ": success");
@@ -35109,6 +35074,7 @@ function WxPostRequest(url, header, data, successFunc, requestFailFunc, response
       }
     },
     fail: function fail() {
+      console.log("失败的请求的数据：", temp_data, " is request data in hook/wxPostRequest");
       console.log(url + ": request fail in hook/wxPostRequest");
 
       if (requestFailFunc) {

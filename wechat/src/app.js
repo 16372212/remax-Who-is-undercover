@@ -23,7 +23,7 @@ const App = ({ children }) => { // 默认input
   );
   
   const [roomInformation, setRoomInfo] = React.useState(
-    { roomId:"000000", // 这个ID并没有返回
+    { roomId:"", // 这个ID并没有返回
       roomInfo:{
         begin_player: "",
         room_setting: {spy_num:1,blank_num:1,total_num:7},
@@ -36,7 +36,7 @@ const App = ({ children }) => { // 默认input
           {open_id:"000004",nick_name:"user4",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:4},
           {open_id:"000005",nick_name:"user5",avatar_url:"null",state:"Ready",word:"word1",role:"Normal",number:5},
         ], // player[] : open_id,nick_name,avatar_url, state, word, role, number
-        state:"Ready", // enum[Open, Wait, Ready, Playing]
+        state:"123", // enum[Open, Wait, Ready, Playing]
         word:{
           id:"01", // string
           normal:"word1", // string

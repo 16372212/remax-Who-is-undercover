@@ -16,6 +16,7 @@ page {
   /* background-color: #323239; */
   /* color: #454d64; */
   /* box-sizing: border-box; */
+  /* height:100%; */
 }
 .content {
   box-sizing: border-box;
@@ -52,8 +53,8 @@ page {
   height: 150px;
   position: absolute;
   background-color: #ffe60f;
-  border-bottom-left-radius: 20%;
-  border-bottom-right-radius: 20%;
+  /* border-bottom-left-radius: 20%; */
+  /* border-bottom-right-radius: 20%; */
   z-index: -1;
 }
 .content {

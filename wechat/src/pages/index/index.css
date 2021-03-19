@@ -121,6 +121,17 @@
   color: #f3daa7;
 }
 
+.InGame-small-white-text {
+  font-size: 33rpx;
+  color: #f5f5ee;
+}
+
+.InGame-white-text {
+  font-size: 43rpx;
+  color: #f7f7f7;
+  font-weight: 80;
+}
+
 .checked .todo-item-text {
   text-decoration: line-through;
   color: #1AA0B8;

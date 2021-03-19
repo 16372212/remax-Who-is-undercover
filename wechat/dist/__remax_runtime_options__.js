@@ -829,12 +829,16 @@ module.exports = {
 },
       pageEvents: {
   "pages/index/index": [
+    "onHide",
     "onLoad",
-    "onShareAppMessage"
+    "onShareAppMessage",
+    "onUnload"
   ],
   "pages/new/index": [
+    "onHide",
     "onLoad",
-    "onShareAppMessage"
+    "onShareAppMessage",
+    "onUnload"
   ]
 },
       appEvents: []
