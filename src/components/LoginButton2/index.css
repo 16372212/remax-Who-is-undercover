@@ -1,0 +1,13 @@
+.login-button2 {
+    display: inline-block;
+    background: none;
+    width: 100%;
+    height: 100%;
+    border: 3rpx solid #607d8bb5;
+    background-color: #8b3f8e9c;
+    border-radius: 100rpx;
+  }
+  
+  .login-button2::after {
+    content: none;
+  }
